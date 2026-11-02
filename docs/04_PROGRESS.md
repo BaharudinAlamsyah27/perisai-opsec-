@@ -8,7 +8,7 @@
 |---|---|---|
 | Registrasi hackathon | ⬜ Belum | T-000 |
 | Repo & scaffold | ✅ Selesai | T-001/T-002 |
-| P0 (MVP) | 5 / 22 task | Gerbang: 9 Nov |
+| P0 (MVP) | 8 / 22 task | Gerbang: 9 Nov |
 | P1 (Pembeda) | 0 / 5 task | Gerbang: 11 Nov |
 | QA | ⬜ | 12 Nov |
 | Deploy publik | ⬜ | 12 Nov |
@@ -27,11 +27,11 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-002 | Scaffold & tooling | AG | ✅ | feat(T-002) | Vite+React18+TS strict+Tailwind v3+Vitest |
 | T-003 | Layout & routing | AG | ✅ | feat(T-003) | Header, Navigasi ID, Tab routing |
 | T-004 | CSP + banner privasi | AG | ✅ | feat(T-004) | netlify.toml, vercel.json, banner Zero-Upload |
-| T-005 | Komponen unggah | AG | ⬜ | | |
+| T-005 | Komponen unggah | AG | ✅ | feat(T-005) | Drag-drop, multi-file, validasi 25MB, store Zustand |
 | T-006 | Engine metadata | CX/AG | ✅ | feat(T-006) | Ekstraksi EXIF via exifr, S/W hemisfer, pemetaan terpisah |
-| T-007 | Peta Leaflet | AG | ⬜ | | |
+| T-007 | Peta Leaflet | AG | ✅ | feat(T-007) | Leaflet map, marker lokal ter-bundle, offline fallback |
 | T-008 | Types + scoring | CX/AG | ✅ | feat(T-008) | Noisy-OR deterministik, level risiko, profil pengali |
-| T-009 | Panel hasil | AG | ⬜ | | |
+| T-009 | Panel hasil | AG | ✅ | feat(T-009) | Skor 0-100, badge level, switcher profil, daftar temuan |
 | T-010 | OCR worker | AG | ⬜ | | |
 | T-011 | Kamus JSON | CX | ⬜ | | |
 | T-012 | Rule engine | CX | ⬜ | | |
@@ -60,7 +60,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-000 (PO), T-001 (PO), lalu T-002 (AG).
+**Berikutnya yang harus dikerjakan:** T-010 (AG: OCR worker + tessdata lokal ind+eng).
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -73,6 +73,11 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint C)
+- Dikerjakan: Komponen unggah drag-drop multi-file dengan validasi format dan batas 25MB (T-005), Zustand store untuk reaktivitas analisis dan profil switcher (`useAnalysisStore`), peta Leaflet interaktif dengan bundling lokal marker icon PNG dan fallback offline anggun (T-007), serta panel hasil analisis lengkap dengan skor noisy-OR 0–100, badge tingkat risiko, pemilih persona (Prajurit/Keluarga/Satuan), dan kartu temuan eviden/alasan/rekomendasi (T-009).
+- Hasil/verifikasi: `npm run lint` bersih (0 warning, 0 error), `npm run build` berhasil (bundle dist/ lengkap), `npm test` lulus 18/18 test suite.
+- Commit: feat(T-005,T-007,T-009)
 
 ### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint B)
 - Dikerjakan: Types terpadu (`src/types/index.ts`), pemetaan aturan ke grup kombinasi (`src/data/combo-groups.json`), scoring engine deterministik Noisy-OR dengan pengali profil (`src/engine/scoring.ts`, T-008), dan metadata engine dengan isolasi fungsi parsing/pemetaan dari pembaca file (`src/engine/metadata.ts`, T-006).
