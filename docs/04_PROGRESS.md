@@ -7,8 +7,8 @@
 | Area | Status | Catatan |
 |---|---|---|
 | Registrasi hackathon | ⬜ Belum | T-000 |
-| Repo & scaffold | ⬜ Belum | T-001/T-002 |
-| P0 (MVP) | 0 / 22 task | Gerbang: 9 Nov |
+| Repo & scaffold | ✅ Selesai | T-001/T-002 |
+| P0 (MVP) | 3 / 22 task | Gerbang: 9 Nov |
 | P1 (Pembeda) | 0 / 5 task | Gerbang: 11 Nov |
 | QA | ⬜ | 12 Nov |
 | Deploy publik | ⬜ | 12 Nov |
@@ -24,9 +24,9 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 |---|---|---|---|---|---|
 | T-000 | Registrasi tim | PO | ⬜ | | |
 | T-001 | Repo + docs | PO | ⬜ | | |
-| T-002 | Scaffold & tooling | AG | ⬜ | | |
-| T-003 | Layout & routing | AG | ⬜ | | |
-| T-004 | CSP + banner privasi | AG | ⬜ | | |
+| T-002 | Scaffold & tooling | AG | ✅ | feat(T-002) | Vite+React18+TS strict+Tailwind v3+Vitest |
+| T-003 | Layout & routing | AG | ✅ | feat(T-003) | Header, Navigasi ID, Tab routing |
+| T-004 | CSP + banner privasi | AG | ✅ | feat(T-004) | netlify.toml, vercel.json, banner Zero-Upload |
 | T-005 | Komponen unggah | AG | ⬜ | | |
 | T-006 | Engine metadata | CX | ⬜ | | |
 | T-007 | Peta Leaflet | AG | ⬜ | | |
@@ -74,6 +74,12 @@ Format:
 - Commit: ...
 ```
 
+### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint A)
+- Dikerjakan: Scaffold Vite + React 18 + TS strict + Tailwind v3 + Vitest + ESLint + Prettier (T-002), layout dan routing navigasi dasar bahasa Indonesia (T-003), banner privasi zero-upload dan konfigurasi CSP produksi di netlify.toml & vercel.json (T-004).
+- Hasil/verifikasi: `npm run build` dan `npm test` lulus.
+- Keputusan: D-006 (lucide-react), D-007 (Tailwind v3).
+- Commit: feat(T-002..T-004)
+
 ### 2 Nov 2026 — PM (Claude) — Sesi #0
 - Dikerjakan: memilih konsep (Perisai OPSEC, kategori Penangkalan), menyusun PRD, arsitektur, rencana kerja, QA, naskah demo.
 - Keputusan: lihat Decision Log D-001 s.d. D-005.
@@ -87,6 +93,8 @@ Format:
 | D-003 | 2 Nov | Inti deterministik, AI opsional opt-in | Tanpa biaya, andal, tidak bergantung kuota | LLM sebagai inti |
 | D-004 | 2 Nov | Target submit 14 Nov (buffer 1 hari) | Hindari kegagalan di menit terakhir | Submit 15 Nov |
 | D-005 | 2 Nov | Rekonstruksi Pola Hidup jadi P1 utama | Pembeda inovasi | Fitur AI vision sebagai pembeda |
+| D-006 | 2 Nov | Tambahkan library ikon `lucide-react` (lisensi ISC) | Ikon UI standar, ringan, lisensi permisif | SVG manual yang verbose |
+| D-007 | 2 Nov | Gunakan Tailwind CSS v3 (v3.4.17) | Kompatibilitas stabil dengan PostCSS & bundler | Tailwind v4 (masih transisi breaking changes) |
 
 ## 5. Daftar Risiko
 | ID | Risiko | Kemungkinan | Dampak | Mitigasi | Pemilik | Status |
