@@ -8,7 +8,7 @@
 |---|---|---|
 | Registrasi hackathon | ⬜ Belum | T-000 |
 | Repo & scaffold | ✅ Selesai | T-001/T-002 |
-| P0 (MVP) | 3 / 22 task | Gerbang: 9 Nov |
+| P0 (MVP) | 5 / 22 task | Gerbang: 9 Nov |
 | P1 (Pembeda) | 0 / 5 task | Gerbang: 11 Nov |
 | QA | ⬜ | 12 Nov |
 | Deploy publik | ⬜ | 12 Nov |
@@ -28,9 +28,9 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-003 | Layout & routing | AG | ✅ | feat(T-003) | Header, Navigasi ID, Tab routing |
 | T-004 | CSP + banner privasi | AG | ✅ | feat(T-004) | netlify.toml, vercel.json, banner Zero-Upload |
 | T-005 | Komponen unggah | AG | ⬜ | | |
-| T-006 | Engine metadata | CX | ⬜ | | |
+| T-006 | Engine metadata | CX/AG | ✅ | feat(T-006) | Ekstraksi EXIF via exifr, S/W hemisfer, pemetaan terpisah |
 | T-007 | Peta Leaflet | AG | ⬜ | | |
-| T-008 | Types + scoring | CX | ⬜ | | |
+| T-008 | Types + scoring | CX/AG | ✅ | feat(T-008) | Noisy-OR deterministik, level risiko, profil pengali |
 | T-009 | Panel hasil | AG | ⬜ | | |
 | T-010 | OCR worker | AG | ⬜ | | |
 | T-011 | Kamus JSON | CX | ⬜ | | |
@@ -73,6 +73,11 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint B)
+- Dikerjakan: Types terpadu (`src/types/index.ts`), pemetaan aturan ke grup kombinasi (`src/data/combo-groups.json`), scoring engine deterministik Noisy-OR dengan pengali profil (`src/engine/scoring.ts`, T-008), dan metadata engine dengan isolasi fungsi parsing/pemetaan dari pembaca file (`src/engine/metadata.ts`, T-006).
+- Hasil/verifikasi: 16 unit test engine di `scoring.test.ts` dan `metadata.test.ts` lulus 100% tanpa mock gambar nyata.
+- Commit: feat(T-006,T-008)
 
 ### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint A)
 - Dikerjakan: Scaffold Vite + React 18 + TS strict + Tailwind v3 + Vitest + ESLint + Prettier (T-002), layout dan routing navigasi dasar bahasa Indonesia (T-003), banner privasi zero-upload dan konfigurasi CSP produksi di netlify.toml & vercel.json (T-004).

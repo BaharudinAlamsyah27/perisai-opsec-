@@ -1,0 +1,20 @@
+{
+  "meta-gps": "lokasi",
+  "meta-gps-extra": "lokasi",
+  "meta-taken-at": "jadwal",
+  "meta-device": "teknis",
+  "meta-serial": "teknis",
+  "meta-artist": "identitas",
+  "opr-satuan": "satuan",
+  "opr-fasilitas": "lokasi",
+  "opr-pergerakan": "pergerakan",
+  "opr-jadwal": "jadwal",
+  "opr-alutsista": "satuan",
+  "opr-dokumen": "satuan",
+  "id-nik": "identitas",
+  "id-nrp": "identitas",
+  "id-phone": "identitas",
+  "id-plate": "identitas",
+  "id-address": "lokasi",
+  "id-nametag": "identitas"
+}
