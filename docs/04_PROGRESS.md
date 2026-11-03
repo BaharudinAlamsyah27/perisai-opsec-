@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — perbaikan I1 diterapkan; verifikasi browser dev/preview masih tertunda, lanjut I2**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 konsistensi profil dan skor diterapkan; lanjut I3**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -90,6 +90,14 @@ Format:
 - Belum selesai: Reproduksi UI browser dev vs `preview`, pemeriksaan MIME/CSP dari respons HTTP, dan uji app browser offline belum dapat dilakukan karena localhost tidak terjangkau dari browser/tool pada sesi ini.
 - Keputusan: CSP deploy tidak diubah; kebijakan saat ini sudah mencakup worker lokal/blob, WASM, dan koneksi same-origin.
 - Blocker/pertanyaan: Perlu uji browser dev/preview dari browser lokal yang dapat membuka server host.
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I2 (konsistensi skor)
+- Dikerjakan: Skor final sekarang memakai profil aktif pada saat kalkulasi. Log mencatat profil dan nilai skor; pergantian persona menambahkan baris log dengan skor hasil kalkulasi ulang. Pergantian profil saat OCR berjalan juga tercatat dan disertakan di log akhir.
+- Hasil/verifikasi: Unit test store memastikan skor Keluarga 26 muncul sama di state dan log.
+- Belum selesai: —
+- Keputusan: —
+- Blocker/pertanyaan: —
 - Commit: menunggu
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)

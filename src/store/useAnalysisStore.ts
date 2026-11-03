@@ -66,17 +66,31 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   setActiveFileId: (id: string) => set({ activeFileId: id }),
 
   setActiveProfile: (profile: Profile) => {
-    set({ activeProfile: profile });
+    const previousProfile = get().activeProfile;
+    if (profile === previousProfile) return;
+
     // Recalculate scores for all analyzed files with new profile
     const { files } = get();
     const updated = files.map((file) => {
-      if (file.score) {
-        const recalculated = calculateScore(file.score.findings, profile);
-        return { ...file, score: recalculated };
-      }
-      return file;
+      const recalculated = file.score ? calculateScore(file.score.findings, profile) : undefined;
+      const now = new Date();
+      const timestamp = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+      const profileName = profile === 'prajurit' ? 'Prajurit' : profile === 'keluarga' ? 'Keluarga' : 'Satuan';
+      const log: AnalysisLog = {
+        timestamp,
+        source: 'SYSTEM',
+        message: recalculated
+          ? `Profil diganti ke ${profileName}. Skor risiko: ${recalculated.value}/100 (${recalculated.level}).`
+          : `Profil diganti ke ${profileName}. Skor dihitung dengan profil aktif saat analisis selesai.`,
+        level: recalculated && recalculated.value >= 50 ? 'crit' : recalculated && recalculated.value >= 25 ? 'warn' : 'info',
+      };
+      return {
+        ...file,
+        ...(recalculated ? { score: recalculated } : {}),
+        logs: [...(file.logs ?? []), log],
+      };
     });
-    set({ files: updated });
+    set({ activeProfile: profile, files: updated });
   },
 
   clearAll: () => {
@@ -168,8 +182,9 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       }
 
       // 4. Calculate final deterministic score
-      const score = calculateScore(boostedFindings, activeProfile);
-      addLog('SYSTEM', `Analisis selesai. Skor risiko: ${score.value}/100 (${score.level}).`, score.value >= 50 ? 'crit' : score.value >= 25 ? 'warn' : 'info');
+      const profile = get().activeProfile;
+      const score = calculateScore(boostedFindings, profile);
+      addLog('SYSTEM', `Analisis selesai. Profil: ${profile}. Skor risiko: ${score.value}/100 (${score.level}).`, score.value >= 50 ? 'crit' : score.value >= 25 ? 'warn' : 'info');
 
       set((state) => ({
         files: state.files.map((f) =>
@@ -180,7 +195,13 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
                 ocrWords,
                 ocrProgress: 100,
                 score,
-                logs: [...logs],
+                logs: [
+                  ...logs,
+                  ...(f.logs ?? []).filter((log) =>
+                    log.message.startsWith('Profil diganti ke ')
+                    && !logs.some((analysisLog) => analysisLog.timestamp === log.timestamp && analysisLog.message === log.message)
+                  ),
+                ],
                 status: 'done',
               }
             : f
