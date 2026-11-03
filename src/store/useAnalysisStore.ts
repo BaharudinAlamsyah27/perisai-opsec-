@@ -7,6 +7,7 @@ import { analyzeText } from '../engine/rules';
 import { mapOcrWordsToFindings } from '../engine/ocr-mapper';
 import { applyComboBoost } from '../engine/combos';
 import { getOcrOutcome } from '../engine/ocrOutcome';
+import { buildOcrTextTokens } from '../engine/rules';
 
 interface AnalysisState {
   files: AnalysisFile[];
@@ -159,9 +160,9 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         ocrWords = ocrResult.words;
         addLog('OCR', `${ocrWords.length} kata berhasil diekstraksi dari visual foto.`);
         // Run opsec rules on recognized OCR text
-        const fullOcrText = ocrWords.map((w) => w.text).join(' ');
+        const ocrText = buildOcrTextTokens(ocrWords);
         addLog('RULES', 'Mengevaluasi teks hasil OCR terhadap katalog aturan OPSEC militer...');
-        const ocrFindings = analyzeText(fullOcrText, 'ocr');
+        const ocrFindings = analyzeText(ocrText.text, 'ocr', ocrText.tokens);
 
         // Map bbox from OCR words to findings
         const mappedOcrFindings = mapOcrWordsToFindings(ocrWords, ocrFindings);

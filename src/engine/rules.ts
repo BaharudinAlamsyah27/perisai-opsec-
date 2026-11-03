@@ -5,6 +5,16 @@ import kamusPergerakan from '../data/kamus-pergerakan.json';
 import kamusJadwal from '../data/kamus-jadwal.json';
 import aturanIdentitas from '../data/aturan-identitas.json';
 import klasifikasiDokumen from '../data/klasifikasi-dokumen.json';
+import type { OcrWord } from '../types';
+
+export const MIN_OCR_WORD_CONFIDENCE = 70;
+
+export interface OcrTextToken {
+  text: string;
+  confidence: number;
+  start: number;
+  end: number;
+}
 
 export function normalizeText(text: string): string {
   if (!text) return '';
@@ -21,7 +31,7 @@ export function normalizeText(text: string): string {
  * Pure function: takes text (from caption or OCR), runs opsec detection rules,
  * and returns deterministic Finding[] array.
  */
-export function analyzeText(text: string, source: Source): Finding[] {
+export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextToken[]): Finding[] {
   if (!text || text.trim().length === 0) {
     return [];
   }
@@ -29,7 +39,17 @@ export function analyzeText(text: string, source: Source): Finding[] {
   const findings: Finding[] = [];
 
   let findingCounter = 0;
-  const nextId = (rule: string) => `${source}-${rule}-${Date.now()}-${findingCounter++}`;
+  const nextId = (rule: string) => `${source}-${rule}-${findingCounter++}`;
+  const validOcrTokens = source === 'ocr' ? ocrTokens ?? tokenizePlainOcrText(text) : [];
+  const confidenceForRange = (start: number, end: number): number | undefined => {
+    if (source !== 'ocr') return undefined;
+    const overlapping = validOcrTokens.filter((token) => token.start < end && token.end > start);
+    if (overlapping.length === 0 || overlapping.some((token) => token.confidence < MIN_OCR_WORD_CONFIDENCE)) return Number.NaN;
+    return Math.round(overlapping.reduce((sum, token) => sum + token.confidence, 0) / overlapping.length);
+  };
+
+  const shouldAcceptOcrRange = (confidence: number | undefined) =>
+    source !== 'ocr' || (confidence !== undefined && Number.isFinite(confidence));
 
   // 1. Dokumen Klasifikasi (Critical/High)
   for (const doc of klasifikasiDokumen) {
@@ -38,13 +58,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
     const regex = new RegExp(`\\b${term}\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-dokumen'),
         ruleId: 'opr-dokumen',
         category: 'operasional',
         severity: doc.severity as Severity,
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: doc.reason,
         recommendation: 'Dilarang keras menyebarkan atau menampilkan dokumen berklasifikasi ke ranah publik.',
         range: { start: match.index, end: match.index + match[0].length },
@@ -60,13 +82,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
     const regex = new RegExp(`\\b${term}(?:\\s*\\d{1,4}[a-z]*)?\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-satuan'),
         ruleId: 'opr-satuan',
         category: 'operasional',
         severity: 'high',
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: `Nama satuan militer '${match[0]}' terdeteksi. Menyebut satuan dapat mengungkap formasi atau identitas unit dinas.`,
         recommendation: 'Hapus atau samarkan penyebutan nama satuan spesifik dalam unggahan.',
         range: { start: match.index, end: match.index + match[0].length },
@@ -80,13 +104,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
     const regex = new RegExp(`\\b${term}\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-fasilitas'),
         ruleId: 'opr-fasilitas',
         category: 'lokasi',
         severity: 'high',
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: `Istilah fasilitas atau instalasi pertahanan '${match[0]}' teridentifikasi.`,
         recommendation: 'Jangan mencantumkan nama atau jenis instalasi dinas dan pos pertahanan.',
         range: { start: match.index, end: match.index + match[0].length },
@@ -100,13 +126,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
     const regex = new RegExp(`\\b${term}\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-pergerakan'),
         ruleId: 'opr-pergerakan',
         category: 'operasional',
         severity: 'medium',
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: `Kata kunci pergerakan militer '${match[0]}' terdeteksi. Berpotensi membuka dinamika kegiatan personel.`,
         recommendation: 'Hindari membagikan status keberangkatan, rute, atau pola pergerakan pasukan.',
         range: { start: match.index, end: match.index + match[0].length },
@@ -120,13 +148,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
     const regex = new RegExp(`\\b${term}\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-jadwal'),
         ruleId: 'opr-jadwal',
         category: 'operasional',
         severity: 'medium',
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: `Kata penunjuk waktu operasional '${match[0]}' terdeteksi.`,
         recommendation: 'Jangan umumkan jadwal atau waktu rencana kegiatan militer sebelum pelaksanaan tuntas.',
         range: { start: match.index, end: match.index + match[0].length },
@@ -144,13 +174,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
       (f) => f.ruleId === 'opr-jadwal' && f.range?.start === timeMatch!.index
     );
     if (!exists) {
+      const confidence = confidenceForRange(timeMatch.index, timeMatch.index + matchedStr.length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       findings.push({
         id: nextId('opr-jadwal'),
         ruleId: 'opr-jadwal',
         category: 'operasional',
         severity: 'medium',
         source,
-        evidence: matchedStr,
+        evidence: source !== 'ocr' ? matchedStr : `${matchedStr} (keyakinan ${confidence}%)`,
         reason: `Spesifikasi waktu / jam '${matchedStr}' terdeteksi di dalam pesan.`,
         recommendation: 'Hapus detail jam atau waktu rencana pergerakan dari teks publik.',
         range: { start: timeMatch.index, end: timeMatch.index + matchedStr.length },
@@ -160,15 +192,15 @@ export function analyzeText(text: string, source: Source): Finding[] {
 
   // 6. Aturan Identitas (NIK, NRP, Telepon, Plat Nomor, Alamat)
   for (const rule of aturanIdentitas) {
-    const regex = new RegExp(rule.pattern, 'gi');
+    const regex = new RegExp(rule.pattern, rule.id === 'id-plate' ? 'g' : 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
       // Validasi konteks tambahan jika diperlukan
       if (rule.id === 'id-plate') {
-        // Filter: plat nomor biasanya 1-2 huruf di awal, 1-4 angka di tengah, 1-3 huruf di akhir
-        // Jangan cocokan kata biasa seperti "A 100" tanpa format plat yang wajar
-        const raw = match[0].replace(/\s+/g, '').toUpperCase();
-        if (raw.length < 4 || raw.length > 9) continue;
+        // Kapital wajib dan pola dibatasi pada satu/dua huruf, angka, lalu kode huruf.
+        if (!/^[A-Z]{1,2}\s*\d{1,4}\s*[A-Z]{1,3}$/.test(match[0])) continue;
       }
 
       findings.push({
@@ -177,7 +209,7 @@ export function analyzeText(text: string, source: Source): Finding[] {
         category: rule.category as Category,
         severity: rule.severity as Severity,
         source,
-        evidence: match[0],
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: rule.reason,
         recommendation: rule.recommendation,
         range: { start: match.index, end: match.index + match[0].length },
@@ -186,4 +218,25 @@ export function analyzeText(text: string, source: Source): Finding[] {
   }
 
   return findings;
+}
+
+function tokenizePlainOcrText(text: string): OcrTextToken[] {
+  const tokens: OcrTextToken[] = [];
+  const regex = /\S+/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(text)) !== null) {
+    tokens.push({ text: match[0], confidence: 100, start: match.index, end: match.index + match[0].length });
+  }
+  return tokens;
+}
+
+export function buildOcrTextTokens(words: OcrWord[]): { text: string; tokens: OcrTextToken[] } {
+  let text = '';
+  const tokens = words.map((word) => {
+    const start = text.length;
+    text += `${text ? ' ' : ''}${word.text}`;
+    const actualStart = start + (start > 0 ? 1 : 0);
+    return { text: word.text, confidence: word.conf, start: actualStart, end: actualStart + word.text.length };
+  });
+  return { text, tokens };
 }
