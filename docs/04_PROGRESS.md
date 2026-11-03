@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 konsistensi skor dan I3 tooltip bobot persona diterapkan; lanjut I4**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 dan I3 selesai; I4 orientasi globe dan test konversi diterapkan, lanjut I5**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -106,6 +106,14 @@ Format:
 - Belum selesai: —
 - Keputusan: Tooltip muncul melalui hover dan fokus keyboard.
 - Blocker/pertanyaan: —
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I4 (orientasi globe)
+- Dikerjakan: Konversi GPS ke orientasi Cobe diekstrak menjadi fungsi murni; orientasi GPS diinterpolasi secara halus dengan sudut terdekat agar tidak berputar jauh pada batas longitude; marker memakai latitude/longitude temuan secara langsung.
+- Hasil/verifikasi: Test unit menguji konversi koordinat dan longitude yang melintasi ±π.
+- Belum selesai: Pemeriksaan visual globe di browser masih menunggu uji browser lokal.
+- Keputusan: —
+- Blocker/pertanyaan: Uji visual marker/rotasi langsung di UI masih tertunda bersama I1.
 - Commit: menunggu
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)

@@ -1,10 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import createGlobe from 'cobe';
+import { nearestEquivalentAngle, toGlobeRotation } from '../utils/globeCoordinates';
 
 interface GlobeHeroProps {
   targetLocation?: { latitude: number; longitude: number };
   className?: string;
 }
+
+const INITIAL_ORIENTATION = toGlobeRotation(-2, 115);
 
 export const GlobeHero: React.FC<GlobeHeroProps> = ({ targetLocation, className = '' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -20,8 +23,8 @@ export const GlobeHero: React.FC<GlobeHeroProps> = ({ targetLocation, className 
 
   useEffect(() => {
     // Initial angle centered on Indonesia (~115° E, ~ -2° S)
-    let phi = 2.8;
-    let theta = 0.1;
+    let phi = INITIAL_ORIENTATION.phi;
+    let theta = INITIAL_ORIENTATION.theta;
     let width = 0;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -47,8 +50,8 @@ export const GlobeHero: React.FC<GlobeHeroProps> = ({ targetLocation, className 
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         width: width * 2,
         height: width * 2,
-        phi: 2.8,
-        theta: 0.1,
+        phi: INITIAL_ORIENTATION.phi,
+        theta: INITIAL_ORIENTATION.theta,
         dark: 1,
         diffuse: 1.6,
         mapSamples: 24000,
@@ -65,8 +68,9 @@ export const GlobeHero: React.FC<GlobeHeroProps> = ({ targetLocation, className 
       const animate = () => {
         if (globe && !document.hidden) {
           if (locationRef.current) {
-            const targetPhi = -(locationRef.current.lon * Math.PI) / 180 + Math.PI / 2;
-            const targetTheta = (locationRef.current.lat * Math.PI) / 180;
+            const target = toGlobeRotation(locationRef.current.lat, locationRef.current.lon);
+            const targetPhi = nearestEquivalentAngle(phi, target.phi);
+            const targetTheta = nearestEquivalentAngle(theta, target.theta);
             phi += (targetPhi - phi) * 0.05;
             theta += (targetTheta - theta) * 0.05;
             globe.update({
@@ -85,7 +89,7 @@ export const GlobeHero: React.FC<GlobeHeroProps> = ({ targetLocation, className 
             }
             globe.update({
               phi,
-              theta: 0.1,
+              theta,
               width: width * 2,
               height: width * 2,
               markers: [],
