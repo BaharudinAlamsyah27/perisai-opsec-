@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 konsistensi profil dan skor diterapkan; lanjut I3**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 konsistensi skor dan I3 tooltip bobot persona diterapkan; lanjut I4**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -97,6 +97,14 @@ Format:
 - Hasil/verifikasi: Unit test store memastikan skor Keluarga 26 muncul sama di state dan log.
 - Belum selesai: —
 - Keputusan: —
+- Blocker/pertanyaan: —
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I3 (bobot profil)
+- Dikerjakan: Mengganti satu angka di label persona dengan tooltip yang memuat bobot Lokasi, Identitas, Operasional, dan Teknis; sumber nilainya langsung dari `PROFILE_MULTIPLIERS` scoring engine.
+- Hasil/verifikasi: Test komponen memeriksa nilai tooltip untuk ketiga profil.
+- Belum selesai: —
+- Keputusan: Tooltip muncul melalui hover dan fokus keyboard.
 - Blocker/pertanyaan: —
 - Commit: menunggu
 

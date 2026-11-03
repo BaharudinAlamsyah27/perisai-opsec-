@@ -6,6 +6,7 @@ import { ScoreGauge } from './ScoreGauge';
 import { RiskRadar } from './RiskRadar';
 import { ShieldCheck, UserCheck, Users, Building2 } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
+import { PROFILE_MULTIPLIERS } from '../engine/scoring';
 
 interface ResultsPanelProps {
   file: AnalysisFile;
@@ -42,6 +43,25 @@ const LEVEL_STYLE: Record<
     description: 'BAHAYA OPSEC: Foto membocorkan koordinat presisi atau dokumen rahasia. Dilarang diunggah!',
   },
 };
+
+const PROFILE_LABELS = {
+  prajurit: 'Prajurit',
+  keluarga: 'Keluarga',
+  satuan: 'Satuan',
+} as const;
+
+const CATEGORY_LABELS = {
+  lokasi: 'Lokasi',
+  identitas: 'Identitas',
+  operasional: 'Operasional',
+  teknis: 'Teknis',
+} as const;
+
+function profileWeightsDescription(profile: keyof typeof PROFILE_MULTIPLIERS): string {
+  const weights = PROFILE_MULTIPLIERS[profile];
+  const categories = Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>;
+  return `${PROFILE_LABELS[profile]} — ${categories.map((category) => `${CATEGORY_LABELS[category]} ${weights[category].toFixed(1)}×`).join(', ')}`;
+}
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   file,
@@ -107,7 +127,11 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               }`}
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Prajurit (1.2x)</span>
+              <span className="group/profile relative">Prajurit
+                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-56 -translate-x-1/2 rounded-lg border border-cyan-700 bg-slate-950 px-3 py-2 text-left text-[10px] leading-relaxed text-slate-200 opacity-0 shadow-xl transition-opacity group-hover/profile:opacity-100 group-focus-within/profile:opacity-100">
+                  {profileWeightsDescription('prajurit')}
+                </span>
+              </span>
             </button>
             <button
               onClick={() => setActiveProfile('keluarga')}
@@ -118,7 +142,11 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Keluarga (1.3x)</span>
+              <span className="group/profile relative">Keluarga
+                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-56 -translate-x-1/2 rounded-lg border border-cyan-700 bg-slate-950 px-3 py-2 text-left text-[10px] leading-relaxed text-slate-200 opacity-0 shadow-xl transition-opacity group-hover/profile:opacity-100 group-focus-within/profile:opacity-100">
+                  {profileWeightsDescription('keluarga')}
+                </span>
+              </span>
             </button>
             <button
               onClick={() => setActiveProfile('satuan')}
@@ -129,7 +157,11 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               }`}
             >
               <Building2 className="w-3.5 h-3.5" />
-              <span>Satuan (1.3x)</span>
+              <span className="group/profile relative">Satuan
+                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-56 -translate-x-1/2 rounded-lg border border-cyan-700 bg-slate-950 px-3 py-2 text-left text-[10px] leading-relaxed text-slate-200 opacity-0 shadow-xl transition-opacity group-hover/profile:opacity-100 group-focus-within/profile:opacity-100">
+                  {profileWeightsDescription('satuan')}
+                </span>
+              </span>
             </button>
           </div>
         </div>
