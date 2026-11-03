@@ -84,7 +84,7 @@ Prajurit, keluarga, dan satuan aktif di media sosial. Satu foto dapat membocorka
 **Real-time:** "sekarang di", "live", "lagi di" + lokasi (medium) · tag lokasi/check-in (medium).
 
 ## 9. Persyaratan Non-Fungsional
-- **Privasi:** zero-upload; CSP `connect-src 'none'` (kecuali fitur AI opt-in yang mengubah kebijakan secara eksplisit di build terpisah/flag).
+- **Privasi:** zero-upload; CSP `connect-src 'none'` (kecuali fitur AI opt-in yang mengubah kebijakan secara eksplisit di build terpisah/flag). **Peta bersifat opt-in**; tile OSM hanya dimuat setelah persetujuan eksplisit pengguna karena permintaan tile dapat mengungkap area kasar lokasi foto ke server OSM.
 - **Kinerja:** foto 12 MP dianalisis < 15 detik di laptop menengah; UI tidak membeku (worker).
 - **Kompatibilitas:** Chrome/Edge/Firefox terbaru; mobile Chrome/Safari layak pakai.
 - **Aksesibilitas:** navigasi keyboard, kontras AA, label ARIA dasar.

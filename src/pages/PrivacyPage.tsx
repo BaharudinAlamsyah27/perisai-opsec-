@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, ShieldCheck, Terminal, CheckCircle2 } from 'lucide-react';
+import { Lock, ShieldCheck, Terminal, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export const PrivacyPage: React.FC = () => {
   return (
@@ -9,8 +9,10 @@ export const PrivacyPage: React.FC = () => {
           <Lock className="w-8 h-8" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Privasi & Jaminan Keamanan</h1>
-          <p className="text-sm text-slate-400">Arsitektur Zero-Upload: Data Anda Tidak Pernah Keluar Dari Browser</p>
+          <h1 className="text-2xl font-bold text-white">Privasi &amp; Jaminan Keamanan</h1>
+          <p className="text-sm text-slate-400">
+            Arsitektur Zero-Upload: Data Anda Tidak Pernah Keluar Dari Browser
+          </p>
         </div>
       </div>
 
@@ -24,21 +26,48 @@ export const PrivacyPage: React.FC = () => {
           <ul className="space-y-3 text-sm text-slate-300">
             <li className="flex items-start space-x-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <span><strong>Pemrosesan 100% di Perangkat:</strong> Ekstraksi metadata EXIF, pembacaan teks OCR, dan mesin aturan OPSEC dieksekusi secara lokal menggunakan JavaScript, WebAssembly, dan Web Worker di memori browser Anda.</span>
+              <span>
+                <strong>Pemrosesan 100% di Perangkat:</strong> Ekstraksi metadata EXIF,
+                pembacaan teks OCR, dan mesin aturan OPSEC dieksekusi secara lokal menggunakan
+                JavaScript, WebAssembly, dan Web Worker di memori browser Anda. Foto tidak
+                pernah meninggalkan perangkat.
+              </span>
             </li>
             <li className="flex items-start space-x-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <span><strong>Tanpa Backend & Tanpa Penyimpanan:</strong> Aplikasi ini tidak memiliki server API penampung data. Foto Anda tidak disimpan di server mana pun, tidak disimpan di database, dan tidak ada cookie pelacak.</span>
+              <span>
+                <strong>Tanpa Backend &amp; Tanpa Penyimpanan:</strong> Aplikasi ini tidak
+                memiliki server API. Foto, teks, dan hasil analisis tidak disimpan di server
+                mana pun. Tidak ada cookie pelacak.
+              </span>
             </li>
             <li className="flex items-start space-x-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <span><strong>Tanpa Pelacakan & Analytics:</strong> Tidak ada skrip analitik pihak ketiga (Google Analytics, Mixpanel, dsb). Tidak ada CDN eksternal yang melacak saat runtime.</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <span><strong>Pengecualian Tunggal:</strong> Tile peta OpenStreetMap dimuat langsung oleh komponen peta untuk menampilkan letak koordinat GPS. Permintaan ini hanya mengambil gambar peta statis dan tidak menyertakan data pribadi Anda.</span>
+              <span>
+                <strong>Tanpa Pelacakan &amp; Analytics:</strong> Tidak ada skrip analitik
+                pihak ketiga (Google Analytics, dsb). Semua aset (termasuk model OCR) di-bundle
+                lokal.
+              </span>
             </li>
           </ul>
+        </div>
+
+        {/* Peta Opt-in Note */}
+        <div className="bg-amber-900/20 border border-amber-500/40 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
+            <span>Pengecualian: Peta (Opt-In)</span>
+          </h2>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Fitur peta interaktif bersifat <strong className="text-amber-300">opt-in</strong>.
+            Secara default, aplikasi hanya menampilkan teks koordinat GPS tanpa memuat peta.
+            Jika Anda menekan tombol &ldquo;Tampilkan Peta&rdquo;, browser akan memuat gambar
+            <em> tile</em> dari server <strong>OpenStreetMap</strong>. Permintaan tile tersebut
+            mengandung informasi koordinat tile (zoom level dan posisi grid), sehingga server
+            OpenStreetMap dapat mengetahui <strong>area kasar lokasi</strong> foto Anda.
+            Data foto Anda tetap tidak pernah dikirim. Jika privasi penuh diperlukan, jangan
+            aktifkan peta.
+          </p>
         </div>
 
         {/* How to verify in DevTools */}
@@ -48,18 +77,33 @@ export const PrivacyPage: React.FC = () => {
             <span>Cara Memverifikasi Secara Mandiri (DevTools)</span>
           </h2>
           <p className="text-sm text-slate-300 mb-3">
-            Anda dapat memverifikasi klaim privasi ini secara transparan kapan saja menggunakan browser Anda:
+            Anda dapat memverifikasi klaim privasi ini secara transparan kapan saja:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-sm text-slate-300 font-mono bg-slate-900/80 p-4 rounded-lg border border-slate-800">
-            <li>Buka alat pengembang browser (<kbd className="bg-slate-800 px-1.5 py-0.5 rounded text-xs text-emerald-400">F12</kbd> atau <kbd className="bg-slate-800 px-1.5 py-0.5 rounded text-xs text-emerald-400">Ctrl+Shift+I</kbd>).</li>
-            <li>Pilih tab <strong>Network</strong> (Jaringan) dan centang opsi <em>Preserve log</em>.</li>
-            <li>Unggah foto dan lakukan analisis di aplikasi PERISAI OPSEC.</li>
-            <li>Amati daftar request: <strong>Nol permintaan HTTP</strong> berisi payload foto/teks Anda ke server manapun.</li>
-            <li>Matikan koneksi WiFi/Internet Anda: aplikasi tetap dapat menganalisis foto secara offline.</li>
+            <li>
+              Buka alat pengembang browser (
+              <kbd className="bg-slate-800 px-1.5 py-0.5 rounded text-xs text-emerald-400">
+                F12
+              </kbd>{' '}
+              atau{' '}
+              <kbd className="bg-slate-800 px-1.5 py-0.5 rounded text-xs text-emerald-400">
+                Ctrl+Shift+I
+              </kbd>
+              ).
+            </li>
+            <li>Pilih tab Network dan centang opsi Preserve log.</li>
+            <li>Unggah foto dan lakukan analisis di PERISAI OPSEC.</li>
+            <li>
+              Amati daftar request: <strong>nol permintaan</strong> berisi payload foto/teks ke
+              server mana pun.
+            </li>
+            <li>
+              Jika peta tidak diaktifkan: <strong>nol request ke tile.openstreetmap.org</strong>.
+            </li>
+            <li>Matikan WiFi/Internet: analisis tetap berjalan offline.</li>
           </ol>
         </div>
       </div>
     </div>
   );
 };
-

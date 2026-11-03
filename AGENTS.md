@@ -8,7 +8,7 @@ sebelum diunggah ke media sosial untuk menemukan kebocoran informasi operasional
 memberi skor risiko, dan menghasilkan versi aman. Kategori hackathon: **Penangkalan**.
 
 ## 2. Prinsip yang tidak boleh dilanggar
-1. **Zero-upload:** data pengguna tidak boleh keluar dari browser. Tidak ada `fetch`/XHR/WebSocket yang membawa data pengguna. Tidak ada analytics, font CDN, atau skrip pihak ketiga saat runtime (semua aset di-bundle). Pengecualian tunggal: tile peta (permintaan gambar, tanpa data pengguna) dan fitur AI opsional yang opt-in.
+1. **Zero-upload:** data pengguna tidak boleh keluar dari browser. Tidak ada `fetch`/XHR/WebSocket yang membawa data pengguna. Tidak ada analytics, font CDN, atau skrip pihak ketiga saat runtime (semua aset di-bundle). Tidak ada pengecualian otomatis. **Peta bersifat opt-in eksplisit**: tile OSM hanya dimuat setelah pengguna menekan tombol, karena permintaan tile dapat mengungkap area kasar lokasi foto ke server OSM. Fitur AI opsional juga opt-in.
 2. **Inti deterministik:** skor dan temuan harus bisa direproduksi tanpa AI. Input sama menghasilkan output sama.
 3. **Disiplin scope:** P0 dulu, lalu P1, lalu P2. Jangan menambah fitur di luar PRD tanpa persetujuan PO.
 4. **Penjelasan:** setiap temuan wajib punya bukti (evidence), alasan, dan rekomendasi tindakan. Skor tanpa penjelasan dianggap bug.

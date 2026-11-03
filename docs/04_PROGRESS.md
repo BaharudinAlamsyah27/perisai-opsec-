@@ -1,7 +1,9 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Terakhir diperbarui:** 2 Nov 2026 oleh PM · **Fase:** Perencanaan selesai, siap Sprint 0
-**Hari ke:** H1 dari 14 · **Sisa waktu ke deadline:** 13 hari
+**Posisi terakhir: Checkpoint D selesai (map opt-in, D-008), mulai T-010 OCR (Checkpoint E)**
+
+**Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 1 (P0)
+**Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
 
 ## 1. Dasbor Ringkas
 | Area | Status | Catatan |
@@ -29,7 +31,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-004 | CSP + banner privasi | AG | ✅ | feat(T-004) | netlify.toml, vercel.json, banner Zero-Upload |
 | T-005 | Komponen unggah | AG | ✅ | feat(T-005) | Drag-drop, multi-file, validasi 25MB, store Zustand |
 | T-006 | Engine metadata | CX/AG | ✅ | feat(T-006) | Ekstraksi EXIF via exifr, S/W hemisfer, pemetaan terpisah |
-| T-007 | Peta Leaflet | AG | ✅ | feat(T-007) | Leaflet map, marker lokal ter-bundle, offline fallback |
+| T-007 | Peta Leaflet | AG | ✅ | feat(T-007) | Leaflet map, marker lokal ter-bundle, offline fallback; D-008: peta jadi opt-in |
 | T-008 | Types + scoring | CX/AG | ✅ | feat(T-008) | Noisy-OR deterministik, level risiko, profil pengali |
 | T-009 | Panel hasil | AG | ✅ | feat(T-009) | Skor 0-100, badge level, switcher profil, daftar temuan |
 | T-010 | OCR worker | AG | ⬜ | | |
@@ -60,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-010 (AG: OCR worker + tessdata lokal ind+eng).
+**Berikutnya yang harus dikerjakan:** T-010 (AG: OCR worker + tessdata lokal ind+eng) — Checkpoint E.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -73,6 +75,12 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 3 Nov 2026 — AG (Antigravity) — Sesi #2 (Checkpoint D)
+- Dikerjakan: Map opt-in (LeafletMap.tsx): tile OSM hanya dimuat setelah pengguna klik tombol eksplisit; tampilkan koordinat teks + peringatan area kasar lokasi; update PrivacyBanner + PrivacyPage; 4 test LeafletMap baru; update AGENTS.md §2.1 dan PRD §9 untuk mencerminkan opt-in; package-lock.json ter-commit; node_modules di .gitignore.
+- Hasil/verifikasi: npm test lulus; npm run lint bersih; npm run build berhasil.
+- Keputusan: D-008 (peta OSM jadi opt-in eksplisit).
+- Commit: feat(D): map opt-in for privacy, update docs and tests (D-008)
 
 ### 2 Nov 2026 — AG (Antigravity) — Sesi #1 (Checkpoint C)
 - Dikerjakan: Komponen unggah drag-drop multi-file dengan validasi format dan batas 25MB (T-005), Zustand store untuk reaktivitas analisis dan profil switcher (`useAnalysisStore`), peta Leaflet interaktif dengan bundling lokal marker icon PNG dan fallback offline anggun (T-007), serta panel hasil analisis lengkap dengan skor noisy-OR 0–100, badge tingkat risiko, pemilih persona (Prajurit/Keluarga/Satuan), dan kartu temuan eviden/alasan/rekomendasi (T-009).
@@ -105,6 +113,7 @@ Format:
 | D-005 | 2 Nov | Rekonstruksi Pola Hidup jadi P1 utama | Pembeda inovasi | Fitur AI vision sebagai pembeda |
 | D-006 | 2 Nov | Tambahkan library ikon `lucide-react` (lisensi ISC) | Ikon UI standar, ringan, lisensi permisif | SVG manual yang verbose |
 | D-007 | 2 Nov | Gunakan Tailwind CSS v3 (v3.4.17) | Kompatibilitas stabil dengan PostCSS & bundler | Tailwind v4 (masih transisi breaking changes) |
+| D-008 | 3 Nov | Peta OSM jadi opt-in eksplisit | Tile request mengungkap area lokasi kasar ke server OSM; prinsip zero-upload diperkuat | Auto-load tile seperti semula |
 
 ## 5. Daftar Risiko
 | ID | Risiko | Kemungkinan | Dampak | Mitigasi | Pemilik | Status |
