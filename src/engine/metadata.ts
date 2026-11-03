@@ -215,3 +215,4 @@ export async function readMetadataFromFile(file: File | Blob): Promise<{ exif: E
     };
   }
 }
+

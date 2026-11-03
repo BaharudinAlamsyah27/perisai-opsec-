@@ -88,3 +88,4 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding }) => {
     </div>
   );
 };
+

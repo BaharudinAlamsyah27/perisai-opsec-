@@ -70,3 +70,4 @@ export function calculateScore(findings: Finding[], profile: Profile = 'prajurit
     findings,
   };
 }
+

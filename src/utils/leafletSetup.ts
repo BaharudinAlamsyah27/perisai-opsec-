@@ -17,3 +17,4 @@ export function setupLeafletIcons() {
 
   L.Marker.prototype.options.icon = DefaultIcon;
 }
+

@@ -61,3 +61,4 @@ export interface AnalysisFile {
   status: 'idle' | 'analyzing' | 'done' | 'error';
   errorMessage?: string;
 }
+
