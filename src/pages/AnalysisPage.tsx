@@ -6,6 +6,7 @@ import { GlobeHero } from '../components/GlobeHero';
 import { ScanOverlay } from '../components/ScanOverlay';
 import { AnalysisConsole } from '../components/AnalysisConsole';
 import { StatTiles } from '../components/StatTiles';
+import { CaptionAnalysis } from '../components/CaptionAnalysis';
 import { Trash2, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export const AnalysisPage: React.FC = () => {
@@ -37,6 +38,11 @@ export const AnalysisPage: React.FC = () => {
           </div>
           <GlobeHero targetLocation={targetGPS} />
         </div>
+      </section>
+
+      {/* Caption Analysis Section (F-07 / T-015) */}
+      <section>
+        <CaptionAnalysis />
       </section>
 
       {/* Main Analysis Section */}

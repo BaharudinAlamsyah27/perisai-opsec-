@@ -80,3 +80,4 @@ export const ScanOverlay: React.FC<ScanOverlayProps> = ({
     </div>
   );
 };
+

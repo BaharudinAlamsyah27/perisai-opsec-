@@ -1,8 +1,8 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint H selesai (Visual Upgrade Command Center OPSEC, Globe 3D, Radar, Gauge, Console, ScanOverlay), lanjut T-015**
+**Posisi terakhir: Task T-015 selesai (Analisis Teks Keterangan/Caption + Highlight Inline + Safe Rewrite Templates), lanjut T-016**
 
-**Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 1 (P0 + Visual Upgrade)
+**Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
 
 ## 1. Dasbor Ringkas
@@ -39,7 +39,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-012 | Rule engine | AG | ✅ | feat(T-010..T-014) | rules.ts fungsi murni, normalisasi teks, validasi pola kontekstual |
 | T-013 | Mapping bbox | AG | ✅ | feat(T-010..T-014) | ocr-mapper.ts menggabungkan urutan kata OCR ke bbox temuan |
 | T-014 | Combo boost | AG | ✅ | feat(T-010..T-014) | combos.ts mendeteksi >=3 grup operasional -> temuan sintetis kritis |
-| T-015 | Analisis caption | AG | ⬜ | | |
+| T-015 | Analisis caption | AG | ✅ | feat(T-015) | Input caption, live inline highlight, generator template penulisan ulang aman |
 | T-016 | Overlay bbox | AG | ⬜ | | |
 | T-017 | Sanitize strip | CX | ⬜ | | |
 | T-018 | Sensor otomatis | AG | ⬜ | | |
@@ -62,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-015 (AG: Analisis teks keterangan / caption + template penulisan ulang).
+**Berikutnya yang harus dikerjakan:** T-016 (AG: Overlay bbox temuan interaktif di atas pratinjau foto dengan aksi hover/sorot).
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -75,6 +75,14 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 3 Nov 2026 — AG (Antigravity) — Sesi #5 (Task T-015: Analisis Caption & Safe Rewrites)
+- Dikerjakan:
+  1. Engine penulisan ulang aman (`src/engine/captionRewriter.ts`): menghasilkan template penulisan ulang aman militer (*Dukungan Moral & Semangat*, *Dokumentasi Pasca-Kegiatan*, *Sensor Otomatis/Redacted*, dan *Persona Keluarga Prajurit*).
+  2. Komponen UI Analisis Caption (`src/components/CaptionAnalysis.tsx`): input teks caption langsung, inline live highlighting untuk setiap kata/frasa berisiko berdasarkan aturan OPSEC, daftar badge temuan, serta kartu kartu template penulisan ulang aman dengan tombol satu-klik salin ke clipboard.
+  3. Integrasi ke `AnalysisPage.tsx` dan penambahan unit test di `captionRewriter.test.ts`.
+- Hasil/verifikasi: `npm test` 39/39 lulus; `npm run lint` 0 error/0 warning; `npm run build` sukses.
+- Commit: feat(T-015): implement caption analysis, inline highlight, and safe rewrite templates
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #4 (Checkpoint H: Visual Upgrade)
 - Dikerjakan:

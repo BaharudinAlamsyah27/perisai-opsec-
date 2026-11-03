@@ -68,3 +68,4 @@ export const AnalysisConsole: React.FC<AnalysisConsoleProps> = ({ logs, classNam
     </div>
   );
 };
+
