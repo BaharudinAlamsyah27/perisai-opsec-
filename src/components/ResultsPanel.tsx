@@ -7,6 +7,7 @@ import { RiskRadar } from './RiskRadar';
 import { ShieldCheck, UserCheck, Users, Building2 } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { PROFILE_MULTIPLIERS } from '../engine/scoring';
+import { RiskReport } from './RiskReport';
 
 interface ResultsPanelProps {
   file: AnalysisFile;
@@ -229,6 +230,8 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
         )}
       </div>
+
+      <RiskReport file={file} profile={activeProfile} />
     </div>
   );
 };
