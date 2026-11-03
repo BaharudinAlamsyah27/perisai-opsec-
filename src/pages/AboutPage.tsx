@@ -69,6 +69,9 @@ export const AboutPage: React.FC = () => {
             <li>• Vite & Tailwind CSS (MIT) — Bundler cepat dan tata letak responsif</li>
             <li>• Zustand (MIT) — Manajemen state client-side ringan</li>
             <li>• exifr (MIT) — Pengurai metadata EXIF/GPS berkinerja tinggi</li>
+            <li>• Tesseract.js &amp; Tesseract.js Core (Apache-2.0) — OCR lokal berbasis WebAssembly</li>
+            <li>• tessdata_fast Indonesia &amp; Inggris (Apache-2.0) — Model bahasa OCR yang dihosting lokal</li>
+            <li>• Cobe (MIT) — Visualisasi globe geolokasi</li>
             <li>• Leaflet & OpenStreetMap (BSD-2-Clause / ODbL) — Visualisasi peta geospasial offline-ready</li>
             <li>• Lucide React (ISC) — Ikon antarmuka pengguna</li>
           </ul>

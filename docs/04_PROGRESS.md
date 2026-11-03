@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I6 selesai; I7 tagline dan pengurangan klaim privasi diterapkan**
+**Posisi terakhir: Checkpoint I1–I7 diterapkan dan di-commit; uji UI browser I1 masih pending. T-020 laporan risiko selesai, lanjut validasi T-017–T-019 lalu T-022**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -10,7 +10,7 @@
 |---|---|---|
 | Registrasi hackathon | ⬜ Belum | T-000 |
 | Repo & scaffold | ✅ Selesai | T-001/T-002 |
-| P0 (MVP) | 8 / 22 task | Gerbang: 9 Nov |
+| P0 (MVP) | Implementasi T-002–T-021 tersedia; T-017–T-019 verifikasi dan T-022 gate masih pending | Gerbang: 9 Nov |
 | P1 (Pembeda) | 0 / 5 task | Gerbang: 11 Nov |
 | QA | ⬜ | 12 Nov |
 | Deploy publik | ⬜ | 12 Nov |
@@ -44,8 +44,8 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-017 | Sanitize strip | CX | 🔄 | | Canvas re-encode tersedia; cek metadata hasil masih perlu diuji |
 | T-018 | Sensor otomatis | AG | 🔄 | | BBox temuan disensor otomatis; gaya mosaik dan blok hitam |
 | T-019 | Perbandingan sebelum/sesudah | AG | 🔄 | | Slider tersedia; skor versi aman tidak diklaim 0 tanpa analisis ulang |
-| T-020 | Laporan risiko | AG | ⬜ | | |
-| T-021 | Privasi/Tentang/Kredit | AG | ⬜ | | |
+| T-020 | Laporan risiko | AG | ✅ | 7e4d243 | Ringkasan temuan dan cetak/simpan PDF dengan print CSS |
+| T-021 | Privasi/Tentang/Kredit | AG | 🔄 | | Halaman privasi/tentang tersedia; kredit Tesseract dan Cobe ditambahkan, tunggu commit |
 | T-022 | Gerbang P0 | CX/PO | ⬜ | | |
 | T-023 | Engine pola hidup | CX | ⬜ | | |
 | T-024 | Halaman pola hidup | AG | ⬜ | | |
@@ -62,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** validasi T-017–T-019 (EXIF hasil, akurasi bbox, pratinjau/unduh), lalu lanjut T-020 laporan risiko.
+**Berikutnya yang harus dikerjakan:** verifikasi T-017–T-019 (terutama ekspor tanpa EXIF dan akurasi sensor), kemudian T-022 gerbang review P0. Checkpoint F/G (T-011–T-014) telah selesai.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -90,7 +90,7 @@ Format:
 - Belum selesai: Reproduksi UI browser dev vs `preview`, pemeriksaan MIME/CSP dari respons HTTP, dan uji app browser offline belum dapat dilakukan karena localhost tidak terjangkau dari browser/tool pada sesi ini.
 - Keputusan: CSP deploy tidak diubah; kebijakan saat ini sudah mencakup worker lokal/blob, WASM, dan koneksi same-origin.
 - Blocker/pertanyaan: Perlu uji browser dev/preview dari browser lokal yang dapat membuka server host.
-- Commit: menunggu
+- Commit: c0411bf
 
 ### 3 Nov 2026 — Codex — Checkpoint I2 (konsistensi skor)
 - Dikerjakan: Skor final sekarang memakai profil aktif pada saat kalkulasi. Log mencatat profil dan nilai skor; pergantian persona menambahkan baris log dengan skor hasil kalkulasi ulang. Pergantian profil saat OCR berjalan juga tercatat dan disertakan di log akhir.
@@ -98,7 +98,7 @@ Format:
 - Belum selesai: —
 - Keputusan: —
 - Blocker/pertanyaan: —
-- Commit: menunggu
+- Commit: c940222
 
 ### 3 Nov 2026 — Codex — Checkpoint I3 (bobot profil)
 - Dikerjakan: Mengganti satu angka di label persona dengan tooltip yang memuat bobot Lokasi, Identitas, Operasional, dan Teknis; sumber nilainya langsung dari `PROFILE_MULTIPLIERS` scoring engine.
@@ -106,7 +106,7 @@ Format:
 - Belum selesai: —
 - Keputusan: Tooltip muncul melalui hover dan fokus keyboard.
 - Blocker/pertanyaan: —
-- Commit: menunggu
+- Commit: 8eedb4c
 
 ### 3 Nov 2026 — Codex — Checkpoint I4 (orientasi globe)
 - Dikerjakan: Konversi GPS ke orientasi Cobe diekstrak menjadi fungsi murni; orientasi GPS diinterpolasi secara halus dengan sudut terdekat agar tidak berputar jauh pada batas longitude; marker memakai latitude/longitude temuan secara langsung.
@@ -114,7 +114,7 @@ Format:
 - Belum selesai: Pemeriksaan visual globe di browser masih menunggu uji browser lokal.
 - Keputusan: —
 - Blocker/pertanyaan: Uji visual marker/rotasi langsung di UI masih tertunda bersama I1.
-- Commit: menunggu
+- Commit: f5442b3
 
 ### 3 Nov 2026 — Codex — Checkpoint I5 (duplikat unggahan)
 - Dikerjakan: Membuat sidik berkas cepat dari nama ternormalisasi, ukuran, dan sampel lokal awal/tengah/akhir. Unggahan yang cocok menampilkan pilihan “Lewati yang duplikat” atau “Tetap tambahkan semua”.
@@ -122,7 +122,7 @@ Format:
 - Belum selesai: —
 - Keputusan: Tidak ada data berkas yang dikirim; hash dihitung di browser.
 - Blocker/pertanyaan: —
-- Commit: menunggu
+- Commit: ccacee6
 
 ### 3 Nov 2026 — Codex — Checkpoint I6 (label waktu EXIF)
 - Dikerjakan: Waktu EXIF diformat tanpa `Z` atau klaim zona waktu; objek Date dipresentasikan memakai komponen waktu perangkat. Label UI menyatakan “WAKTU MENURUT PERANGKAT”.
@@ -130,11 +130,27 @@ Format:
 - Belum selesai: —
 - Keputusan: —
 - Blocker/pertanyaan: —
-- Commit: menunggu
+- Commit: 552ddaf
 
 ### 3 Nov 2026 — Codex — Checkpoint I7 (tagline & klaim lokal)
 - Dikerjakan: Subjudul header diganti menjadi “Periksa sebelum unggah.” Klaim persentase pemrosesan lokal di badge header, upload zone, dan footer diganti dengan label yang tidak berulang; klaim eksplisit tetap ada di banner privasi.
 - Hasil/verifikasi: Smoke test memeriksa tagline dan batas maksimal dua klaim `100%` lokal/perangkat pada layar awal.
+- Belum selesai: —
+- Keputusan: —
+- Blocker/pertanyaan: —
+- Commit: 58a0b2c
+
+### 3 Nov 2026 — Codex — T-020 (laporan risiko)
+- Dikerjakan: Menambah ringkasan laporan foto aktif, profil, skor, bukti, alasan, serta rekomendasi; tombol cetak/simpan PDF dan CSS khusus cetak A4.
+- Hasil/verifikasi: Test laporan memastikan ringkasan dan seluruh bukti/alasan/rekomendasi muncul serta tombol memanggil fungsi cetak. `npm run lint` bersih dan `npm run build` sukses.
+- Belum selesai: Ekspor cetak/PDF perlu pemeriksaan visual di browser.
+- Keputusan: —
+- Blocker/pertanyaan: Pemeriksaan visual browser lokal masih tidak tersedia di sesi ini.
+- Commit: 7e4d243
+
+### 3 Nov 2026 — Codex — T-021 (kredit lisensi)
+- Dikerjakan: Melengkapi kredit Tentang untuk Tesseract.js/Core, model tessdata Indonesia/Inggris, dan Cobe beserta lisensinya. Halaman Privasi/Tentang sudah tersedia.
+- Hasil/verifikasi: Build dan lint akan dicatat pada validasi akhir sesi.
 - Belum selesai: —
 - Keputusan: —
 - Blocker/pertanyaan: —
