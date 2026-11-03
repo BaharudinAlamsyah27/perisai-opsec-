@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Task T-015 selesai (Analisis Teks Keterangan/Caption + Highlight Inline + Safe Rewrite Templates), lanjut T-016**
+**Posisi terakhir: Task T-016 selesai (Overlay BBox Interaktif & Hover Highlighting Antara Kartu & Foto), lanjut T-017**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -40,7 +40,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-013 | Mapping bbox | AG | ✅ | feat(T-010..T-014) | ocr-mapper.ts menggabungkan urutan kata OCR ke bbox temuan |
 | T-014 | Combo boost | AG | ✅ | feat(T-010..T-014) | combos.ts mendeteksi >=3 grup operasional -> temuan sintetis kritis |
 | T-015 | Analisis caption | AG | ✅ | feat(T-015) | Input caption, live inline highlight, generator template penulisan ulang aman |
-| T-016 | Overlay bbox | AG | ⬜ | | |
+| T-016 | Overlay bbox | AG | ✅ | feat(T-016) | Interaktivitas hover kartu temuan <-> sorot visual target-lock bbox |
 | T-017 | Sanitize strip | CX | ⬜ | | |
 | T-018 | Sensor otomatis | AG | ⬜ | | |
 | T-019 | Perbandingan sebelum/sesudah | AG | ⬜ | | |
@@ -62,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-016 (AG: Overlay bbox temuan interaktif di atas pratinjau foto dengan aksi hover/sorot).
+**Berikutnya yang harus dikerjakan:** T-017 (CX: Sanitize strip EXIF metadata via re-encode canvas).
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -75,6 +75,14 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)
+- Dikerjakan:
+  1. Implementasi state `hoveredFindingId` terpadu pada `AnalysisPage.tsx`.
+  2. Modifikasi `FindingCard.tsx` dengan event `onMouseEnter`/`onMouseLeave` dan indikator badge `SOROT VISUAL` untuk temuan yang memiliki koordinat bbox.
+  3. Modifikasi `ScanOverlay.tsx` dengan reticle target-lock dinamis, ring cyan bercahaya dan efek elevasi saat kartu temuan di-hover (serta sebaliknya saat bbox di foto di-hover).
+- Hasil/verifikasi: `npm test` 39/39 passed, `npm run lint` 0 warning/error, `npm run build` sukses.
+- Commit: feat(T-016): interactive bbox overlay with bi-directional hover highlighting
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #6 (GlobeHero Polish & Layout Alignment)
 - Dikerjakan:

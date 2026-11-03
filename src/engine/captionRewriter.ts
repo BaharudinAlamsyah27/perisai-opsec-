@@ -86,3 +86,4 @@ export function generateSafeRewrites(originalText: string, findings: Finding[]):
 
   return suggestions;
 }
+

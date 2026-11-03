@@ -11,6 +11,7 @@ import { Trash2, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export const AnalysisPage: React.FC = () => {
   const { files, activeFileId, setActiveFileId, removeFile, clearAll } = useAnalysisStore();
+  const [hoveredFindingId, setHoveredFindingId] = React.useState<string | null>(null);
 
   const activeFile = files.find((f) => f.id === activeFileId) ?? files[0];
 
@@ -110,11 +111,13 @@ export const AnalysisPage: React.FC = () => {
                       className="object-contain w-full h-full max-h-80"
                     />
 
-                    {/* ScanOverlay HUD with Scanline & Target Lock BBoxes */}
+                    {/* ScanOverlay HUD with Scanline & Interactive Target Lock BBoxes */}
                     <ScanOverlay
                       isScanning={activeFile.status === 'analyzing'}
                       progress={activeFile.ocrProgress || 0}
                       findings={activeFile.score?.findings || []}
+                      hoveredFindingId={hoveredFindingId}
+                      onHoverFinding={setHoveredFindingId}
                     />
                   </div>
 
@@ -169,7 +172,11 @@ export const AnalysisPage: React.FC = () => {
 
               {/* Right Column: Results & Analysis Findings */}
               <div className="lg:col-span-7">
-                <ResultsPanel file={activeFile} />
+                <ResultsPanel
+                  file={activeFile}
+                  hoveredFindingId={hoveredFindingId}
+                  onHoverFinding={setHoveredFindingId}
+                />
               </div>
             </div>
           )}

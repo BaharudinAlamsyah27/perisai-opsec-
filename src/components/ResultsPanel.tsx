@@ -9,6 +9,8 @@ import { useAnalysisStore } from '../store/useAnalysisStore';
 
 interface ResultsPanelProps {
   file: AnalysisFile;
+  hoveredFindingId?: string | null;
+  onHoverFinding?: (id: string | null) => void;
 }
 
 const LEVEL_STYLE: Record<
@@ -41,7 +43,11 @@ const LEVEL_STYLE: Record<
   },
 };
 
-export const ResultsPanel: React.FC<ResultsPanelProps> = ({ file }) => {
+export const ResultsPanel: React.FC<ResultsPanelProps> = ({
+  file,
+  hoveredFindingId = null,
+  onHoverFinding,
+}) => {
   const { activeProfile, setActiveProfile } = useAnalysisStore();
   const score = file.score ?? { value: 0, level: 'Aman', findings: [] };
   const style = LEVEL_STYLE[score.level] ?? LEVEL_STYLE.Aman;
@@ -181,7 +187,12 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ file }) => {
         ) : (
           <div className="grid grid-cols-1 gap-3">
             {score.findings.map((finding) => (
-              <FindingCard key={finding.id} finding={finding} />
+              <FindingCard
+                key={finding.id}
+                finding={finding}
+                isHovered={hoveredFindingId === finding.id}
+                onHover={onHoverFinding}
+              />
             ))}
           </div>
         )}

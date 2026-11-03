@@ -1,9 +1,11 @@
 import React from 'react';
 import { Finding, Severity } from '../types';
-import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle, Crosshair } from 'lucide-react';
 
 interface FindingCardProps {
   finding: Finding;
+  isHovered?: boolean;
+  onHover?: (id: string | null) => void;
 }
 
 const SEVERITY_CONFIG: Record<
@@ -42,12 +44,23 @@ const SEVERITY_CONFIG: Record<
   },
 };
 
-export const FindingCard: React.FC<FindingCardProps> = ({ finding }) => {
+export const FindingCard: React.FC<FindingCardProps> = ({
+  finding,
+  isHovered = false,
+  onHover,
+}) => {
   const config = SEVERITY_CONFIG[finding.severity] ?? SEVERITY_CONFIG.info;
+  const hasBbox = Boolean(finding.bbox);
 
   return (
     <div
-      className={`border rounded-xl p-4 transition-all duration-200 ${config.borderClass}`}
+      onMouseEnter={() => onHover?.(finding.id)}
+      onMouseLeave={() => onHover?.(null)}
+      className={`border rounded-xl p-4 transition-all duration-200 cursor-default ${
+        isHovered
+          ? 'border-cyan-400 bg-cyan-950/30 shadow-[0_0_15px_rgba(6,182,212,0.25)] scale-[1.008]'
+          : config.borderClass
+      }`}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center space-x-2">
@@ -61,14 +74,23 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding }) => {
             [{finding.category}] • {finding.source}
           </span>
         </div>
+
+        {hasBbox && (
+          <div className="flex items-center space-x-1 text-[10px] font-mono text-cyan-400 bg-cyan-950/50 border border-cyan-800/50 px-2 py-0.5 rounded">
+            <Crosshair className="w-3 h-3 text-cyan-400 animate-pulse" />
+            <span>SOROT VISUAL</span>
+          </div>
+        )}
       </div>
 
       {/* Evidence */}
-      <div className="mb-2 bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 font-mono text-xs text-emerald-400 break-words">
-        <span className="text-slate-400 font-sans block text-[10px] uppercase tracking-wide">
-          Bukti Temuan:
-        </span>
-        {finding.evidence}
+      <div className="mb-2 bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 font-mono text-xs text-cyan-300 break-words flex items-center justify-between">
+        <div>
+          <span className="text-slate-400 font-sans block text-[10px] uppercase tracking-wide">
+            Bukti Temuan:
+          </span>
+          {finding.evidence}
+        </div>
       </div>
 
       {/* Reason */}
@@ -88,4 +110,3 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding }) => {
     </div>
   );
 };
-

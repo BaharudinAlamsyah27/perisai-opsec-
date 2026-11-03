@@ -210,3 +210,4 @@ export const CaptionAnalysis: React.FC<CaptionAnalysisProps> = ({ className = ''
     </div>
   );
 };
+

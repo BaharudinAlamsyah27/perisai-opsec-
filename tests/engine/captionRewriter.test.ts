@@ -32,3 +32,4 @@ describe('Caption Rewriter Engine (F-07 / T-015)', () => {
     expect(redactedTemplate?.text).toContain('[DISENSOR]');
   });
 });
+
