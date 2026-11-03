@@ -6,6 +6,7 @@ import { runOcr } from '../engine/ocr';
 import { analyzeText } from '../engine/rules';
 import { mapOcrWordsToFindings } from '../engine/ocr-mapper';
 import { applyComboBoost } from '../engine/combos';
+import { getOcrOutcome } from '../engine/ocrOutcome';
 
 interface AnalysisState {
   files: AnalysisFile[];
@@ -87,7 +88,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   },
 
   analyzeFile: async (id: string) => {
-    const { files, activeProfile } = get();
+    const { files } = get();
     const target = files.find((f) => f.id === id);
     if (!target) return;
 
@@ -135,11 +136,12 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         }));
       });
 
-      if (ocrResult.error) {
-        addLog('OCR', `Catatan OCR: ${ocrResult.error}`, 'warn');
+      const ocrOutcome = getOcrOutcome(ocrResult);
+      if (ocrOutcome === 'error') {
+        addLog('OCR', `OCR GAGAL (ERROR TEKNIS): ${ocrResult.error}`, 'crit');
       }
 
-      if (ocrResult.words && ocrResult.words.length > 0) {
+      if (ocrOutcome === 'recognized') {
         ocrWords = ocrResult.words;
         addLog('OCR', `${ocrWords.length} kata berhasil diekstraksi dari visual foto.`);
         // Run opsec rules on recognized OCR text
@@ -151,8 +153,8 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         const mappedOcrFindings = mapOcrWordsToFindings(ocrWords, ocrFindings);
         currentFindings = [...currentFindings, ...mappedOcrFindings];
         addLog('RULES', `${mappedOcrFindings.length} temuan aturan cocok pada teks OCR.`, mappedOcrFindings.length > 0 ? 'warn' : 'info');
-      } else {
-        addLog('OCR', 'Tidak ada teks yang dapat dikenali pada gambar.');
+      } else if (ocrOutcome === 'empty') {
+        addLog('OCR', 'OCR berhasil; tidak ada teks yang dikenali pada gambar.');
       }
 
       // 3. Apply Combo Boost (Pola Penugasan co-occurrence)

@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Implementasi T-017–T-019 sedang berjalan; perlu validasi lokal dan review acceptance sebelum ditandai selesai**
+**Posisi terakhir: Checkpoint I — perbaikan I1 diterapkan; verifikasi browser dev/preview masih tertunda, lanjut I2**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -83,6 +83,14 @@ Format:
 - Keputusan: Tidak mengarang skor hasil sanitasi; UI menyatakan perlu analisis ulang.
 - Blocker/pertanyaan: —
 - Commit: —
+
+### 3 Nov 2026 — Codex — Checkpoint I1 (perbaikan OCR)
+- Dikerjakan: Menetapkan `gzip: false` untuk aset traineddata yang tidak dikompresi; memakai base URL lokal untuk worker/core/bahasa; meminta output `blocks` Tesseract.js v7 dan memetakan kata+bbox dari struktur bersarangnya; membedakan error OCR teknis dari hasil berhasil tanpa teks; log error menyertakan pesan teknis. Fixture sintetis `POS JAGA YONIF 999` dibuat.
+- Hasil/verifikasi: `npm test` 49/49 lulus, lint bersih, build produksi sukses. OCR Tesseract Node offline mengenali “POS JAGA YONIF 999” dengan 4 kata+bbox memakai aset `public/tessdata` dan `dist/tessdata`.
+- Belum selesai: Reproduksi UI browser dev vs `preview`, pemeriksaan MIME/CSP dari respons HTTP, dan uji app browser offline belum dapat dilakukan karena localhost tidak terjangkau dari browser/tool pada sesi ini.
+- Keputusan: CSP deploy tidak diubah; kebijakan saat ini sudah mencakup worker lokal/blob, WASM, dan koneksi same-origin.
+- Blocker/pertanyaan: Perlu uji browser dev/preview dari browser lokal yang dapat membuka server host.
+- Commit: menunggu
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)
 - Dikerjakan:

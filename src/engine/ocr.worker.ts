@@ -1,5 +1,6 @@
 import { createWorker } from 'tesseract.js';
 import type { OcrWord } from '../types';
+import { mapTesseractBlocksToWords } from './ocrWords';
 
 export interface OcrProgressMessage {
   type: 'progress';
@@ -33,10 +34,13 @@ self.onmessage = async (e: MessageEvent<OcrWorkerRequest>) => {
   const { imageBitmap, imageDataUrl, originalWidth, originalHeight, scaledWidth, scaledHeight } = e.data;
 
   try {
+    const tessdataPath = new URL(`${import.meta.env.BASE_URL}tessdata/`, self.location.origin).href;
     const worker = await createWorker(['ind', 'eng'], 1, {
-      workerPath: '/tessdata/worker.min.js',
-      corePath: '/tessdata',
-      langPath: '/tessdata',
+      workerPath: new URL('worker.min.js', tessdataPath).href,
+      corePath: tessdataPath,
+      langPath: tessdataPath,
+      // Aset lokal berformat .traineddata biasa, bukan .traineddata.gz.
+      gzip: false,
       logger: (m) => {
         if (m.status === 'recognizing text') {
           const progress = Math.round((m.progress || 0) * 100);
@@ -54,30 +58,12 @@ self.onmessage = async (e: MessageEvent<OcrWorkerRequest>) => {
       throw new Error('No valid image provided for OCR');
     }
 
-    const ret = await worker.recognize(imageSource);
+    const ret = await worker.recognize(imageSource, {}, { text: true, blocks: true });
     await worker.terminate();
 
     const scaleX = scaledWidth > 0 ? originalWidth / scaledWidth : 1;
     const scaleY = scaledHeight > 0 ? originalHeight / scaledHeight : 1;
-
-    const words: OcrWord[] = [];
-    const tesseractWords = (ret.data as { words?: Array<{ text?: string; confidence?: number; bbox?: { x0: number; y0: number; x1: number; y1: number } }> })?.words || [];
-
-    for (const w of tesseractWords) {
-      const text = (w.text || '').trim();
-      if (!text) continue;
-
-      const x0 = Math.round((w.bbox?.x0 ?? 0) * scaleX);
-      const y0 = Math.round((w.bbox?.y0 ?? 0) * scaleY);
-      const x1 = Math.round((w.bbox?.x1 ?? 0) * scaleX);
-      const y1 = Math.round((w.bbox?.y1 ?? 0) * scaleY);
-
-      words.push({
-        text,
-        conf: typeof w.confidence === 'number' ? w.confidence : 0,
-        bbox: { x0, y0, x1, y1 },
-      });
-    }
+    const words = mapTesseractBlocksToWords(ret.data.blocks, scaleX, scaleY);
 
     self.postMessage({
       type: 'success',

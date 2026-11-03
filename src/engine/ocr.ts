@@ -95,9 +95,9 @@ export async function runOcr(
           }
         };
 
-        worker.onerror = (err) => {
+        worker.onerror = (err: ErrorEvent) => {
           worker.terminate();
-          reject(err);
+          reject(new Error(err.message || `Worker OCR gagal pada ${err.filename || 'skrip worker'}`));
         };
 
         worker.postMessage({
