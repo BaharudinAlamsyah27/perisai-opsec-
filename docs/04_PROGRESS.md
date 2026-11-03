@@ -45,7 +45,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-018 | Sensor otomatis | AG | 🔄 | | BBox temuan disensor otomatis; gaya mosaik dan blok hitam |
 | T-019 | Perbandingan sebelum/sesudah | AG | 🔄 | | Slider tersedia; skor versi aman tidak diklaim 0 tanpa analisis ulang |
 | T-020 | Laporan risiko | AG | ✅ | 7e4d243 | Ringkasan temuan dan cetak/simpan PDF dengan print CSS |
-| T-021 | Privasi/Tentang/Kredit | AG | 🔄 | | Halaman privasi/tentang tersedia; kredit Tesseract dan Cobe ditambahkan, tunggu commit |
+| T-021 | Privasi/Tentang/Kredit | AG | ✅ | 6430ce3 | Halaman privasi/tentang tersedia; lisensi OCR dan globe dicantumkan |
 | T-022 | Gerbang P0 | CX/PO | ⬜ | | |
 | T-023 | Engine pola hidup | CX | ⬜ | | |
 | T-024 | Halaman pola hidup | AG | ⬜ | | |
@@ -78,11 +78,11 @@ Format:
 
 ### 3 Nov 2026 — Codex — Sesi analisis & lanjutan T-017–T-019
 - Dikerjakan: Membaca PRD, arsitektur, rencana kerja, progress tracker, dan implementasi yang ada. Melanjutkan perubahan lokal SanitizerPreview/sanitize yang belum di-commit; area sensor sekarang benar-benar dimosaikkan atau diblok hitam, bbox di-clamp dan bbox kosong dilewati, pratinjau memakai object URL yang dibersihkan, nama unduhan generik, serta klaim skor 0 dihapus karena hasil belum dianalisis ulang.
-- Hasil/verifikasi: Belum dijalankan pada sesi ini; perubahan masih perlu build, unit test sanitize, dan uji metadata gambar hasil sesuai acceptance T-017–T-019.
+- Hasil/verifikasi: Unit test, lint, dan build produksi lulus pada validasi berikutnya; uji metadata hasil dan browser masih pending.
 - Belum selesai: Uji ekspor tanpa EXIF, visual bbox pada berbagai rasio gambar, penanganan error browser, dan penilaian ulang skor versi aman.
 - Keputusan: Tidak mengarang skor hasil sanitasi; UI menyatakan perlu analisis ulang.
 - Blocker/pertanyaan: —
-- Commit: —
+- Commit: cdd4254
 
 ### 3 Nov 2026 — Codex — Checkpoint I1 (perbaikan OCR)
 - Dikerjakan: Menetapkan `gzip: false` untuk aset traineddata yang tidak dikompresi; memakai base URL lokal untuk worker/core/bahasa; meminta output `blocks` Tesseract.js v7 dan memetakan kata+bbox dari struktur bersarangnya; membedakan error OCR teknis dari hasil berhasil tanpa teks; log error menyertakan pesan teknis. Fixture sintetis `POS JAGA YONIF 999` dibuat.
@@ -142,7 +142,7 @@ Format:
 
 ### 3 Nov 2026 — Codex — T-020 (laporan risiko)
 - Dikerjakan: Menambah ringkasan laporan foto aktif, profil, skor, bukti, alasan, serta rekomendasi; tombol cetak/simpan PDF dan CSS khusus cetak A4.
-- Hasil/verifikasi: Test laporan memastikan ringkasan dan seluruh bukti/alasan/rekomendasi muncul serta tombol memanggil fungsi cetak. `npm run lint` bersih dan `npm run build` sukses.
+- Hasil/verifikasi: Test laporan memastikan ringkasan dan seluruh bukti/alasan/rekomendasi muncul serta tombol memanggil fungsi cetak. Validasi akhir: 53 test lulus, lint bersih, build sukses.
 - Belum selesai: Ekspor cetak/PDF perlu pemeriksaan visual di browser.
 - Keputusan: —
 - Blocker/pertanyaan: Pemeriksaan visual browser lokal masih tidak tersedia di sesi ini.
@@ -150,10 +150,18 @@ Format:
 
 ### 3 Nov 2026 — Codex — T-021 (kredit lisensi)
 - Dikerjakan: Melengkapi kredit Tentang untuk Tesseract.js/Core, model tessdata Indonesia/Inggris, dan Cobe beserta lisensinya. Halaman Privasi/Tentang sudah tersedia.
-- Hasil/verifikasi: Build dan lint akan dicatat pada validasi akhir sesi.
+- Hasil/verifikasi: Validasi akhir lint dan build lulus; seluruh suite 53 test lulus.
 - Belum selesai: —
 - Keputusan: —
 - Blocker/pertanyaan: —
+- Commit: 6430ce3
+
+### 3 Nov 2026 — Codex — Validasi akhir Checkpoint I & T-020/T-021
+- Dikerjakan: Test, lint, dan build untuk keseluruhan perubahan.
+- Hasil/verifikasi: `npm test` — 18 file, 53 test lulus; `npm run lint` — bersih; `npm run build` — sukses. Vite menampilkan peringatan ukuran bundle utama sedikit di atas 500 kB.
+- Belum selesai: Reproduksi dan uji OCR pada UI browser dev/preview/offline; pemeriksaan visual globe dan laporan cetak; validasi EXIF/sensor ekspor versi aman.
+- Keputusan: OCR Node offline mengonfirmasi model lokal dan bbox pada `public/tessdata` serta `dist/tessdata`; ini belum menggantikan verifikasi browser.
+- Blocker/pertanyaan: Browser/tool sesi tidak dapat membuka server localhost sehingga validasi UI tetap menunggu lingkungan browser lokal.
 - Commit: menunggu
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)
