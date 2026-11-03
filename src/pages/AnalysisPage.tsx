@@ -155,7 +155,7 @@ export const AnalysisPage: React.FC = () => {
                         <span className="text-slate-200">{activeFile.exif.make || '-'} {activeFile.exif.model || ''}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-500">WAKTU DIAMBIL:</span>
+                        <span className="block text-[10px] text-slate-500">WAKTU MENURUT PERANGKAT:</span>
                         <span className="text-slate-200">{activeFile.exif.takenAt || '-'}</span>
                       </div>
                       <div>

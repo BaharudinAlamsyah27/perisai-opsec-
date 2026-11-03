@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I4 selesai; I5 deteksi duplikat dan pilihan pengguna diterapkan, lanjut I6**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I5 selesai; I6 waktu EXIF tanpa zona waktu diterapkan, lanjut I7**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -121,6 +121,14 @@ Format:
 - Hasil/verifikasi: Unit test sidik berkas dan test komponen untuk kedua pilihan.
 - Belum selesai: —
 - Keputusan: Tidak ada data berkas yang dikirim; hash dihitung di browser.
+- Blocker/pertanyaan: —
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I6 (label waktu EXIF)
+- Dikerjakan: Waktu EXIF diformat tanpa `Z` atau klaim zona waktu; objek Date dipresentasikan memakai komponen waktu perangkat. Label UI menyatakan “WAKTU MENURUT PERANGKAT”.
+- Hasil/verifikasi: Unit test memastikan format tidak memiliki `Z` dan menjaga jam yang dikodekan EXIF.
+- Belum selesai: —
+- Keputusan: —
 - Blocker/pertanyaan: —
 - Commit: menunggu
 

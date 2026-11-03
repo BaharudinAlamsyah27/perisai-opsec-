@@ -44,16 +44,13 @@ export function parseRawExif(raw: Record<string, any> | null | undefined): ExifD
     raw.GPSLongitudeRef
   );
 
-  let takenAt: string | undefined = undefined;
-  if (raw.DateTimeOriginal instanceof Date) {
-    takenAt = raw.DateTimeOriginal.toISOString();
-  } else if (raw.DateTimeOriginal) {
-    takenAt = String(raw.DateTimeOriginal);
-  } else if (raw.CreateDate instanceof Date) {
-    takenAt = raw.CreateDate.toISOString();
-  } else if (raw.CreateDate) {
-    takenAt = String(raw.CreateDate);
-  }
+  const rawTakenAt = raw.DateTimeOriginal ?? raw.CreateDate;
+  const takenAt = rawTakenAt instanceof Date
+    ? [
+      `${rawTakenAt.getFullYear()}-${String(rawTakenAt.getMonth() + 1).padStart(2, '0')}-${String(rawTakenAt.getDate()).padStart(2, '0')}`,
+      `${String(rawTakenAt.getHours()).padStart(2, '0')}:${String(rawTakenAt.getMinutes()).padStart(2, '0')}:${String(rawTakenAt.getSeconds()).padStart(2, '0')}`,
+    ].join(' ')
+    : rawTakenAt ? String(rawTakenAt).replace(/Z$/i, '').replace('T', ' ') : undefined;
 
   const altitude = typeof raw.GPSAltitude === 'number' ? Number(raw.GPSAltitude.toFixed(1)) : undefined;
   const direction = typeof raw.GPSImgDirection === 'number' ? Number(raw.GPSImgDirection.toFixed(1)) : undefined;

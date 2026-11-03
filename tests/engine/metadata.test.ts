@@ -38,7 +38,7 @@ describe('Metadata Engine', () => {
         longitude: 110.8316,
         GPSAltitude: 125.45,
         GPSImgDirection: 180.2,
-        DateTimeOriginal: new Date('2026-11-03T05:12:00.000Z'),
+        DateTimeOriginal: new Date(2026, 10, 3, 5, 12, 0),
         Make: 'Samsung',
         Model: 'Galaxy S23',
         SerialNumber: 'SN-FIKTIF-001',
@@ -51,12 +51,18 @@ describe('Metadata Engine', () => {
       expect(parsed.longitude).toBe(110.8316);
       expect(parsed.altitude).toBe(125.5);
       expect(parsed.direction).toBe(180.2);
-      expect(parsed.takenAt).toBe('2026-11-03T05:12:00.000Z');
+      expect(parsed.takenAt).toBe('2026-11-03 05:12:00');
       expect(parsed.make).toBe('Samsung');
       expect(parsed.model).toBe('Galaxy S23');
       expect(parsed.serialNumber).toBe('SN-FIKTIF-001');
       expect(parsed.software).toBe('OneUI 6.0');
       expect(parsed.artist).toBe('Kopda Fiktif');
+    });
+
+    it('formats EXIF timestamps without claiming a timezone', () => {
+      const parsed = parseRawExif({ DateTimeOriginal: '2026-11-03T05:12:00Z' });
+      expect(parsed.takenAt).toBe('2026-11-03 05:12:00');
+      expect(parsed.takenAt).not.toContain('Z');
     });
   });
 
