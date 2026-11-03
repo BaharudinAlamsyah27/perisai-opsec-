@@ -1,0 +1,22 @@
+[
+  {
+    "term": "rahasia",
+    "severity": "critical",
+    "reason": "Cap/klasifikasi dokumen RAHASIA terdeteksi di dalam teks."
+  },
+  {
+    "term": "sangat rahasia",
+    "severity": "critical",
+    "reason": "Cap/klasifikasi dokumen SANGAT RAHASIA terdeteksi."
+  },
+  {
+    "term": "terbatas",
+    "severity": "high",
+    "reason": "Klasifikasi dokumen dinas TERBATAS terdeteksi."
+  },
+  {
+    "term": "konfidensial",
+    "severity": "high",
+    "reason": "Klasifikasi dokumen KONFIDENSIAL terdeteksi."
+  }
+]

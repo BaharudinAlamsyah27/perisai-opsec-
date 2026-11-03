@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint D selesai (map opt-in, D-008), mulai T-010 OCR (Checkpoint E)**
+**Posisi terakhir: Checkpoint G selesai (T-010 OCR, T-011 Kamus, T-012 Rules Engine, T-013 OCR Mapper, T-014 Combos Engine), lanjut T-015**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 1 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -34,11 +34,11 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-007 | Peta Leaflet | AG | ✅ | feat(T-007) | Leaflet map, marker lokal ter-bundle, offline fallback; D-008: peta jadi opt-in |
 | T-008 | Types + scoring | CX/AG | ✅ | feat(T-008) | Noisy-OR deterministik, level risiko, profil pengali |
 | T-009 | Panel hasil | AG | ✅ | feat(T-009) | Skor 0-100, badge level, switcher profil, daftar temuan |
-| T-010 | OCR worker | AG | ⬜ | | |
-| T-011 | Kamus JSON | CX | ⬜ | | |
-| T-012 | Rule engine | CX | ⬜ | | |
-| T-013 | Mapping bbox | CX | ⬜ | | |
-| T-014 | Combo boost | CX | ⬜ | | |
+| T-010 | OCR worker | AG | ✅ | feat(T-010..T-014) | Tesseract.js worker lokal ind+eng, downscaling maks 2400px, bbox scaling |
+| T-011 | Kamus JSON | AG | ✅ | feat(T-010..T-014) | Kamus satuan, lokasi, pergerakan, jadwal, identitas, dokumen di src/data/ |
+| T-012 | Rule engine | AG | ✅ | feat(T-010..T-014) | rules.ts fungsi murni, normalisasi teks, validasi pola kontekstual |
+| T-013 | Mapping bbox | AG | ✅ | feat(T-010..T-014) | ocr-mapper.ts menggabungkan urutan kata OCR ke bbox temuan |
+| T-014 | Combo boost | AG | ✅ | feat(T-010..T-014) | combos.ts mendeteksi >=3 grup operasional -> temuan sintetis kritis |
 | T-015 | Analisis caption | AG | ⬜ | | |
 | T-016 | Overlay bbox | AG | ⬜ | | |
 | T-017 | Sanitize strip | CX | ⬜ | | |
@@ -62,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-010 (AG: OCR worker + tessdata lokal ind+eng) — Checkpoint E.
+**Berikutnya yang harus dikerjakan:** T-015 (AG: Analisis teks keterangan / caption + template penulisan ulang).
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -75,6 +75,19 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 3 Nov 2026 — AG (Antigravity) — Sesi #3 (Checkpoint E, F, G)
+- Dikerjakan:
+  1. Checkpoint E (T-010): Web Worker OCR (`src/engine/ocr.worker.ts`) dengan Tesseract.js v7 + core WASM + traineddata fast lokal (ind+eng) di `public/tessdata/`, penanganan downscale gambar maks 2400px dengan proyeksi kembali skala bbox, wrapper OCR dengan retry max 2x (`src/engine/ocr.ts`).
+  2. Checkpoint F (T-011 + T-012): Kamus JSON militer di `src/data/` (satuan, lokasi, pergerakan, jadwal, identitas, klasifikasi dokumen) serta engine aturan teks murni (`src/engine/rules.ts`) dengan normalisasi dan validasi konteks.
+  3. Checkpoint G (T-013 + T-014): Pemetaan kata OCR berurutan ke bounding box temuan (`src/engine/ocr-mapper.ts`) dan boost kombinasi co-occurrence operasional (`src/engine/combos.ts`) yang menghasilkan temuan sintetis 'Pola Penugasan Terbaca' (critical).
+  4. Integrasi ke Zustand `useAnalysisStore.ts` dan kalkulasi scoring deterministik Noisy-OR.
+- Hasil/verifikasi:
+  - `npm test`: 35/35 test lulus (scoring, metadata, rules, combos, ocr, map, app smoke).
+  - `npm run lint`: 0 error, 0 warning (TypeScript strict tanpa any).
+  - `npm run build`: bundle produksi sukses tsc & vite build.
+- Keputusan: D-009 (Aset Tesseract dan tessdata_fast lokal Apache-2.0).
+- Commit: feat(T-010..T-014)
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #2 (Checkpoint D)
 - Dikerjakan: Map opt-in (LeafletMap.tsx): tile OSM hanya dimuat setelah pengguna klik tombol eksplisit; tampilkan koordinat teks + peringatan area kasar lokasi; update PrivacyBanner + PrivacyPage; 4 test LeafletMap baru; update AGENTS.md §2.1 dan PRD §9 untuk mencerminkan opt-in; package-lock.json ter-commit; node_modules di .gitignore.
@@ -114,6 +127,7 @@ Format:
 | D-006 | 2 Nov | Tambahkan library ikon `lucide-react` (lisensi ISC) | Ikon UI standar, ringan, lisensi permisif | SVG manual yang verbose |
 | D-007 | 2 Nov | Gunakan Tailwind CSS v3 (v3.4.17) | Kompatibilitas stabil dengan PostCSS & bundler | Tailwind v4 (masih transisi breaking changes) |
 | D-008 | 3 Nov | Peta OSM jadi opt-in eksplisit | Tile request mengungkap area lokasi kasar ke server OSM; prinsip zero-upload diperkuat | Auto-load tile seperti semula |
+| D-009 | 3 Nov | Bundling aset Tesseract.js & tessdata_fast lokal (Apache-2.0) | Zero-upload dan zero-CDN di runtime, privasi & offline penuh | Mengambil traineddata dari CDN saat runtime |
 
 ## 5. Daftar Risiko
 | ID | Risiko | Kemungkinan | Dampak | Mitigasi | Pemilik | Status |

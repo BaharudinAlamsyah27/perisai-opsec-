@@ -49,6 +49,12 @@ export interface ExifData {
   copyright?: string;
 }
 
+export interface OcrWord {
+  text: string;
+  conf: number;
+  bbox: BoundingBox;
+}
+
 export interface AnalysisFile {
   id: string;
   file: File;
@@ -57,6 +63,8 @@ export interface AnalysisFile {
   size: number;
   type: string;
   exif?: ExifData;
+  ocrWords?: OcrWord[];
+  ocrProgress?: number;
   score?: Score;
   status: 'idle' | 'analyzing' | 'done' | 'error';
   errorMessage?: string;

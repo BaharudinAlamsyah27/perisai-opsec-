@@ -1,7 +1,11 @@
 import { create } from 'zustand';
-import { AnalysisFile, Profile } from '../types';
+import { AnalysisFile, Profile, Finding, OcrWord } from '../types';
 import { readMetadataFromFile } from '../engine/metadata';
 import { calculateScore } from '../engine/scoring';
+import { runOcr } from '../engine/ocr';
+import { analyzeText } from '../engine/rules';
+import { mapOcrWordsToFindings } from '../engine/ocr-mapper';
+import { applyComboBoost } from '../engine/combos';
 
 interface AnalysisState {
   files: AnalysisFile[];
@@ -95,10 +99,37 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
 
     try {
       // 1. Read EXIF metadata
-      const { exif, findings } = await readMetadataFromFile(target.file);
+      const { exif, findings: exifFindings } = await readMetadataFromFile(target.file);
 
-      // 2. Calculate score
-      const score = calculateScore(findings, activeProfile);
+      // Update intermediate metadata findings
+      let currentFindings: Finding[] = [...exifFindings];
+
+      // 2. OCR text recognition with progress
+      let ocrWords: OcrWord[] = [];
+      const ocrResult = await runOcr(target.file, (percent) => {
+        set((state) => ({
+          files: state.files.map((f) =>
+            f.id === id ? { ...f, ocrProgress: percent } : f
+          ),
+        }));
+      });
+
+      if (ocrResult.words && ocrResult.words.length > 0) {
+        ocrWords = ocrResult.words;
+        // Run opsec rules on recognized OCR text
+        const fullOcrText = ocrWords.map((w) => w.text).join(' ');
+        const ocrFindings = analyzeText(fullOcrText, 'ocr');
+
+        // Map bbox from OCR words to findings
+        const mappedOcrFindings = mapOcrWordsToFindings(ocrWords, ocrFindings);
+        currentFindings = [...currentFindings, ...mappedOcrFindings];
+      }
+
+      // 3. Apply Combo Boost (Pola Penugasan co-occurrence)
+      const boostedFindings = applyComboBoost(currentFindings);
+
+      // 4. Calculate final deterministic score
+      const score = calculateScore(boostedFindings, activeProfile);
 
       set((state) => ({
         files: state.files.map((f) =>
@@ -106,6 +137,8 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
             ? {
                 ...f,
                 exif,
+                ocrWords,
+                ocrProgress: 100,
                 score,
                 status: 'done',
               }
