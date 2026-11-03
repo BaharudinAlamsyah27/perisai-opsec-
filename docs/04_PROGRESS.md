@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I5 selesai; I6 waktu EXIF tanpa zona waktu diterapkan, lanjut I7**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I6 selesai; I7 tagline dan pengurangan klaim privasi diterapkan**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -127,6 +127,14 @@ Format:
 ### 3 Nov 2026 — Codex — Checkpoint I6 (label waktu EXIF)
 - Dikerjakan: Waktu EXIF diformat tanpa `Z` atau klaim zona waktu; objek Date dipresentasikan memakai komponen waktu perangkat. Label UI menyatakan “WAKTU MENURUT PERANGKAT”.
 - Hasil/verifikasi: Unit test memastikan format tidak memiliki `Z` dan menjaga jam yang dikodekan EXIF.
+- Belum selesai: —
+- Keputusan: —
+- Blocker/pertanyaan: —
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I7 (tagline & klaim lokal)
+- Dikerjakan: Subjudul header diganti menjadi “Periksa sebelum unggah.” Klaim persentase pemrosesan lokal di badge header, upload zone, dan footer diganti dengan label yang tidak berulang; klaim eksplisit tetap ada di banner privasi.
+- Hasil/verifikasi: Smoke test memeriksa tagline dan batas maksimal dua klaim `100%` lokal/perangkat pada layar awal.
 - Belum selesai: —
 - Keputusan: —
 - Blocker/pertanyaan: —

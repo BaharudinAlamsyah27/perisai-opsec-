@@ -24,7 +24,7 @@ export const App: React.FC = () => {
       <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
           <span>PERISAI OPSEC &copy; 2026 — Kartika Cyber Hackathon (Penangkalan)</span>
-          <span className="text-slate-400">100% Client-Side Processing • Tanpa Pengiriman Data</span>
+          <span className="text-slate-400">Analisis berjalan di perangkat • Tanpa pengiriman data</span>
         </div>
       </footer>
     </div>

@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-mono">
-                Sistem Penangkalan Kebocoran Siber-Militer
+                Periksa sebelum unggah.
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
           {/* Privacy badge */}
           <div className="hidden md:flex items-center space-x-2 text-[11px] font-mono bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-800/50">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-cyan-300 font-medium">100% LOKAL (ZERO-UPLOAD)</span>
+            <span className="text-cyan-300 font-medium">TANPA UNGGAH DATA</span>
           </div>
         </div>
       </div>
