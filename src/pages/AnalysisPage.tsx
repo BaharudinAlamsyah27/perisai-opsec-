@@ -2,6 +2,10 @@ import React from 'react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { UploadZone } from '../components/UploadZone';
 import { ResultsPanel } from '../components/ResultsPanel';
+import { GlobeHero } from '../components/GlobeHero';
+import { ScanOverlay } from '../components/ScanOverlay';
+import { AnalysisConsole } from '../components/AnalysisConsole';
+import { StatTiles } from '../components/StatTiles';
 import { Trash2, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export const AnalysisPage: React.FC = () => {
@@ -9,11 +13,30 @@ export const AnalysisPage: React.FC = () => {
 
   const activeFile = files.find((f) => f.id === activeFileId) ?? files[0];
 
+  const targetGPS =
+    activeFile?.exif?.latitude !== undefined && activeFile?.exif?.longitude !== undefined
+      ? { latitude: activeFile.exif.latitude, longitude: activeFile.exif.longitude }
+      : undefined;
+
   return (
     <div className="space-y-8">
-      {/* Upload Zone */}
+      {/* Session Stats Banner */}
       <section>
-        <UploadZone />
+        <StatTiles files={files} />
+      </section>
+
+      {/* Hero: Command Center OPSEC (Upload Zone + 3D Tactical Globe) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div className="lg:col-span-8">
+          <UploadZone />
+        </div>
+        <div className="lg:col-span-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+          <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80 text-[10px] font-mono text-cyan-400">
+            <span>GLOBE GEOLOKASI (WASM)</span>
+            <span className="text-slate-500">OFFLINE 3D</span>
+          </div>
+          <GlobeHero targetLocation={targetGPS} />
+        </div>
       </section>
 
       {/* Main Analysis Section */}
@@ -28,16 +51,16 @@ export const AnalysisPage: React.FC = () => {
                   <button
                     key={file.id}
                     onClick={() => setActiveFileId(file.id)}
-                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
+                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all border ${
                       isSelected
-                        ? 'bg-emerald-600/20 border-emerald-500/60 text-emerald-300'
-                        : 'bg-slate-800/60 border-slate-700/60 text-slate-300 hover:bg-slate-800'
+                        ? 'bg-cyan-950/60 border-cyan-500/80 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                     }`}
                   >
                     <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
                     <span className="max-w-[120px] truncate">{file.name}</span>
                     {file.status === 'analyzing' && (
-                      <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
+                      <Loader2 className="w-3 h-3 animate-spin text-cyan-400" />
                     )}
                     {file.score && (
                       <span
@@ -59,30 +82,37 @@ export const AnalysisPage: React.FC = () => {
 
             <button
               onClick={clearAll}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/40 border border-rose-900/40 transition-colors self-start sm:self-auto"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-rose-400 hover:bg-rose-950/40 border border-rose-900/40 transition-colors self-start sm:self-auto"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Hapus Semua Sesi</span>
+              <span>RESET SEMUA SESI</span>
             </button>
           </div>
 
           {/* Active File Content View */}
           {activeFile && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column: Image Preview & File Meta */}
+              {/* Left Column: Image Preview with ScanOverlay & Terminal Logs */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 overflow-hidden shadow-lg">
+                <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 overflow-hidden shadow-2xl relative">
                   <div className="relative group rounded-xl overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
                     <img
                       src={activeFile.previewUrl}
                       alt={activeFile.name}
                       className="object-contain w-full h-full max-h-80"
                     />
+
+                    {/* ScanOverlay HUD with Scanline & Target Lock BBoxes */}
+                    <ScanOverlay
+                      isScanning={activeFile.status === 'analyzing'}
+                      progress={activeFile.ocrProgress || 0}
+                      findings={activeFile.score?.findings || []}
+                    />
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+                  <div className="mt-3 flex items-center justify-between text-xs font-mono text-slate-400 border-t border-slate-800/80 pt-3">
                     <div className="flex items-center space-x-2 truncate">
-                      <FileText className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      <FileText className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                       <span className="font-medium text-slate-200 truncate">{activeFile.name}</span>
                     </div>
                     <div className="flex items-center space-x-3 flex-shrink-0">
@@ -98,27 +128,30 @@ export const AnalysisPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Analysis Terminal Console */}
+                <AnalysisConsole logs={activeFile.logs || []} />
+
                 {/* Technical Meta summary */}
                 {activeFile.exif && Object.keys(activeFile.exif).length > 0 && (
-                  <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs space-y-2">
-                    <span className="text-[11px] font-semibold text-slate-300 block uppercase tracking-wider">
-                      Rincian Metadata Terbaca
+                  <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-xs font-mono space-y-2">
+                    <span className="text-[10px] font-semibold text-cyan-400 block uppercase tracking-wider">
+                      RINCIAN METADATA EXIF TERDETEKSI
                     </span>
                     <div className="grid grid-cols-2 gap-2 text-slate-400">
                       <div>
-                        <span className="block text-[10px] text-slate-400">Kamera / HP:</span>
+                        <span className="block text-[10px] text-slate-500">KAMERA / HP:</span>
                         <span className="text-slate-200">{activeFile.exif.make || '-'} {activeFile.exif.model || ''}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-400">Waktu Foto:</span>
+                        <span className="block text-[10px] text-slate-500">WAKTU DIAMBIL:</span>
                         <span className="text-slate-200">{activeFile.exif.takenAt || '-'}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-400">Nomor Seri:</span>
+                        <span className="block text-[10px] text-slate-500">NOMOR SERI:</span>
                         <span className="text-slate-200 font-mono">{activeFile.exif.serialNumber || '-'}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-400">Software:</span>
+                        <span className="block text-[10px] text-slate-500">SOFTWARE PENGOLAH:</span>
                         <span className="text-slate-200 truncate block">{activeFile.exif.software || '-'}</span>
                       </div>
                     </div>

@@ -55,6 +55,13 @@ export interface OcrWord {
   bbox: BoundingBox;
 }
 
+export interface AnalysisLog {
+  timestamp: string;
+  source: 'SYSTEM' | 'EXIF' | 'OCR' | 'RULES' | 'COMBO';
+  message: string;
+  level: 'info' | 'warn' | 'crit';
+}
+
 export interface AnalysisFile {
   id: string;
   file: File;
@@ -65,6 +72,7 @@ export interface AnalysisFile {
   exif?: ExifData;
   ocrWords?: OcrWord[];
   ocrProgress?: number;
+  logs?: AnalysisLog[];
   score?: Score;
   status: 'idle' | 'analyzing' | 'done' | 'error';
   errorMessage?: string;

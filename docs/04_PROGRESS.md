@@ -1,8 +1,8 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint G selesai (T-010 OCR, T-011 Kamus, T-012 Rules Engine, T-013 OCR Mapper, T-014 Combos Engine), lanjut T-015**
+**Posisi terakhir: Checkpoint H selesai (Visual Upgrade Command Center OPSEC, Globe 3D, Radar, Gauge, Console, ScanOverlay), lanjut T-015**
 
-**Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 1 (P0)
+**Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 1 (P0 + Visual Upgrade)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
 
 ## 1. Dasbor Ringkas
@@ -76,6 +76,20 @@ Format:
 - Commit: ...
 ```
 
+### 3 Nov 2026 — AG (Antigravity) — Sesi #4 (Checkpoint H: Visual Upgrade)
+- Dikerjakan:
+  1. Transformasi tema UI menjadi 'Command Center OPSEC' militer-siber: palet gelap cyan/emerald dengan batas aksen HUD corner brackets, grid halus, dan kontras AA penuh.
+  2. GlobeHero (`src/components/GlobeHero.tsx`): globe 3D WebGL via library ringan `cobe` (~5 KB, MIT, D-010). Berputar pelan secara lokal, memutar halus ke titik GPS target saat ada koordinat foto terdeteksi, dengan fallback senyap dan dukungan prefers-reduced-motion.
+  3. ScanOverlay (`src/components/ScanOverlay.tsx`): efek garis pemindaian cyan bercahaya di atas foto saat status 'analyzing', dan target-lock reticle bounding box untuk temuan visual OCR.
+  4. RiskRadar (`src/components/RiskRadar.tsx`): visualisasi vektor ancaman 4 sumbu (Lokasi, Identitas, Operasional, Teknis) berbasis SVG murni tanpa dependensi chart eksternal.
+  5. ScoreGauge (`src/components/ScoreGauge.tsx`): circular gauge SVG dengan animasi counter naik dan pewarnaan dinamis sesuai tingkat risiko.
+  6. AnalysisConsole (`src/components/AnalysisConsole.tsx`): terminal log audit interaktif yang menampilkan proses nyata engine (EXIF, OCR, RULES, COMBO).
+  7. StatTiles (`src/components/StatTiles.tsx`): dasbor metrik sesi (total foto, titik temuan, skor puncak, indikator 0 byte data keluar).
+  8. Header, PrivacyBanner, UploadZone, dan ResultsPanel disinkronkan dengan tema Command Center.
+- Hasil/verifikasi: `npm test` 37/37 lulus; `npm run lint` 0 error/0 warning; `npm run build` sukses.
+- Keputusan: D-010 (Library 3D WebGL `cobe` untuk visualisasi geolokasi globe).
+- Commit: feat(H): visual upgrade to opsec command center
+
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #3 (Checkpoint E, F, G)
 - Dikerjakan:
   1. Checkpoint E (T-010): Web Worker OCR (`src/engine/ocr.worker.ts`) dengan Tesseract.js v7 + core WASM + traineddata fast lokal (ind+eng) di `public/tessdata/`, penanganan downscale gambar maks 2400px dengan proyeksi kembali skala bbox, wrapper OCR dengan retry max 2x (`src/engine/ocr.ts`).
@@ -128,6 +142,7 @@ Format:
 | D-007 | 2 Nov | Gunakan Tailwind CSS v3 (v3.4.17) | Kompatibilitas stabil dengan PostCSS & bundler | Tailwind v4 (masih transisi breaking changes) |
 | D-008 | 3 Nov | Peta OSM jadi opt-in eksplisit | Tile request mengungkap area lokasi kasar ke server OSM; prinsip zero-upload diperkuat | Auto-load tile seperti semula |
 | D-009 | 3 Nov | Bundling aset Tesseract.js & tessdata_fast lokal (Apache-2.0) | Zero-upload dan zero-CDN di runtime, privasi & offline penuh | Mengambil traineddata dari CDN saat runtime |
+| D-010 | 3 Nov | Gunakan library 3D WebGL `cobe` (~5 KB, MIT) untuk GlobeHero | Ringan, tanpa request CDN/jaringan, performa tinggi tanpa tile peta | Canvas 2D manual atau Three.js yang membengkakkan bundle |
 
 ## 5. Daftar Risiko
 | ID | Risiko | Kemungkinan | Dampak | Mitigasi | Pemilik | Status |

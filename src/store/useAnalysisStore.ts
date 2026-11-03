@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AnalysisFile, Profile, Finding, OcrWord } from '../types';
+import { AnalysisFile, Profile, Finding, OcrWord, AnalysisLog } from '../types';
 import { readMetadataFromFile } from '../engine/metadata';
 import { calculateScore } from '../engine/scoring';
 import { runOcr } from '../engine/ocr';
@@ -91,20 +91,41 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     const target = files.find((f) => f.id === id);
     if (!target) return;
 
+    const logs: AnalysisLog[] = [];
+    const addLog = (source: AnalysisLog['source'], message: string, level: AnalysisLog['level'] = 'info') => {
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+      logs.push({ timestamp: timeStr, source, message, level });
+    };
+
+    addLog('SYSTEM', `Memulai analisis berkas ${target.name} (${Math.round(target.size / 1024)} KB)`);
+
     set((state) => ({
       files: state.files.map((f) =>
-        f.id === id ? { ...f, status: 'analyzing' } : f
+        f.id === id ? { ...f, status: 'analyzing', logs: [...logs] } : f
       ),
     }));
 
     try {
       // 1. Read EXIF metadata
+      addLog('EXIF', 'Mengekstrak metadata EXIF (GPS, waktu, perangkat)...');
       const { exif, findings: exifFindings } = await readMetadataFromFile(target.file);
+
+      if (exif.latitude !== undefined && exif.longitude !== undefined) {
+        addLog('EXIF', `GPS Terdeteksi: ${exif.latitude.toFixed(5)}, ${exif.longitude.toFixed(5)}`, 'crit');
+      } else {
+        addLog('EXIF', 'Tidak ditemukan koordinat GPS pada metadata berkas.');
+      }
+
+      if (exifFindings.length > 0) {
+        addLog('EXIF', `${exifFindings.length} potensi kebocoran metadata ditemukan.`, 'warn');
+      }
 
       // Update intermediate metadata findings
       let currentFindings: Finding[] = [...exifFindings];
 
       // 2. OCR text recognition with progress
+      addLog('OCR', 'Memulai engine OCR WebWorker lokal (bahasa ind+eng)...');
       let ocrWords: OcrWord[] = [];
       const ocrResult = await runOcr(target.file, (percent) => {
         set((state) => ({
@@ -114,22 +135,39 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         }));
       });
 
+      if (ocrResult.error) {
+        addLog('OCR', `Catatan OCR: ${ocrResult.error}`, 'warn');
+      }
+
       if (ocrResult.words && ocrResult.words.length > 0) {
         ocrWords = ocrResult.words;
+        addLog('OCR', `${ocrWords.length} kata berhasil diekstraksi dari visual foto.`);
         // Run opsec rules on recognized OCR text
         const fullOcrText = ocrWords.map((w) => w.text).join(' ');
+        addLog('RULES', 'Mengevaluasi teks hasil OCR terhadap katalog aturan OPSEC militer...');
         const ocrFindings = analyzeText(fullOcrText, 'ocr');
 
         // Map bbox from OCR words to findings
         const mappedOcrFindings = mapOcrWordsToFindings(ocrWords, ocrFindings);
         currentFindings = [...currentFindings, ...mappedOcrFindings];
+        addLog('RULES', `${mappedOcrFindings.length} temuan aturan cocok pada teks OCR.`, mappedOcrFindings.length > 0 ? 'warn' : 'info');
+      } else {
+        addLog('OCR', 'Tidak ada teks yang dapat dikenali pada gambar.');
       }
 
       // 3. Apply Combo Boost (Pola Penugasan co-occurrence)
+      addLog('COMBO', 'Memeriksa korelasi ko-okurensi grup operasional...');
       const boostedFindings = applyComboBoost(currentFindings);
+      const comboFound = boostedFindings.find((f) => f.ruleId === 'combo-pola-penugasan');
+      if (comboFound) {
+        addLog('COMBO', 'Peringatan: Pola Penugasan Terbaca! Korelasi >=3 kelompok operasional teridentifikasi.', 'crit');
+      } else {
+        addLog('COMBO', 'Tidak ada anomali kombinasi pola penugasan.');
+      }
 
       // 4. Calculate final deterministic score
       const score = calculateScore(boostedFindings, activeProfile);
+      addLog('SYSTEM', `Analisis selesai. Skor risiko: ${score.value}/100 (${score.level}).`, score.value >= 50 ? 'crit' : score.value >= 25 ? 'warn' : 'info');
 
       set((state) => ({
         files: state.files.map((f) =>
@@ -140,6 +178,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
                 ocrWords,
                 ocrProgress: 100,
                 score,
+                logs: [...logs],
                 status: 'done',
               }
             : f
@@ -147,12 +186,14 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       }));
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Gagal menganalisis berkas';
+      addLog('SYSTEM', `Kesalahan analisis: ${errorMsg}`, 'crit');
       set((state) => ({
         files: state.files.map((f) =>
           f.id === id
             ? {
                 ...f,
                 status: 'error',
+                logs: [...logs],
                 errorMessage: errorMsg,
               }
             : f
