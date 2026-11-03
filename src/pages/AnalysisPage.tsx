@@ -7,6 +7,7 @@ import { ScanOverlay } from '../components/ScanOverlay';
 import { AnalysisConsole } from '../components/AnalysisConsole';
 import { StatTiles } from '../components/StatTiles';
 import { CaptionAnalysis } from '../components/CaptionAnalysis';
+import { SanitizerPreview } from '../components/SanitizerPreview';
 import { Trash2, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export const AnalysisPage: React.FC = () => {
@@ -170,13 +171,16 @@ export const AnalysisPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Right Column: Results & Analysis Findings */}
-              <div className="lg:col-span-7">
+              {/* Right Column: Results & Analysis Findings & Sanitizer */}
+              <div className="lg:col-span-7 space-y-6">
                 <ResultsPanel
                   file={activeFile}
                   hoveredFindingId={hoveredFindingId}
                   onHoverFinding={setHoveredFindingId}
                 />
+
+                {/* Sanitizer & Comparison Preview (T-017, T-018, T-019) */}
+                <SanitizerPreview file={activeFile} />
               </div>
             </div>
           )}

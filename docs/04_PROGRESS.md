@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Task T-016 selesai (Overlay BBox Interaktif & Hover Highlighting Antara Kartu & Foto), lanjut T-017**
+**Posisi terakhir: Implementasi T-017–T-019 sedang berjalan; perlu validasi lokal dan review acceptance sebelum ditandai selesai**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -41,9 +41,9 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-014 | Combo boost | AG | ✅ | feat(T-010..T-014) | combos.ts mendeteksi >=3 grup operasional -> temuan sintetis kritis |
 | T-015 | Analisis caption | AG | ✅ | feat(T-015) | Input caption, live inline highlight, generator template penulisan ulang aman |
 | T-016 | Overlay bbox | AG | ✅ | feat(T-016) | Interaktivitas hover kartu temuan <-> sorot visual target-lock bbox |
-| T-017 | Sanitize strip | CX | ⬜ | | |
-| T-018 | Sensor otomatis | AG | ⬜ | | |
-| T-019 | Perbandingan sebelum/sesudah | AG | ⬜ | | |
+| T-017 | Sanitize strip | CX | 🔄 | | Canvas re-encode tersedia; cek metadata hasil masih perlu diuji |
+| T-018 | Sensor otomatis | AG | 🔄 | | BBox temuan disensor otomatis; gaya mosaik dan blok hitam |
+| T-019 | Perbandingan sebelum/sesudah | AG | 🔄 | | Slider tersedia; skor versi aman tidak diklaim 0 tanpa analisis ulang |
 | T-020 | Laporan risiko | AG | ⬜ | | |
 | T-021 | Privasi/Tentang/Kredit | AG | ⬜ | | |
 | T-022 | Gerbang P0 | CX/PO | ⬜ | | |
@@ -62,7 +62,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
 
-**Berikutnya yang harus dikerjakan:** T-017 (CX: Sanitize strip EXIF metadata via re-encode canvas).
+**Berikutnya yang harus dikerjakan:** validasi T-017–T-019 (EXIF hasil, akurasi bbox, pratinjau/unduh), lalu lanjut T-020 laporan risiko.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
@@ -75,6 +75,14 @@ Format:
 - Blocker/pertanyaan: ...
 - Commit: ...
 ```
+
+### 3 Nov 2026 — Codex — Sesi analisis & lanjutan T-017–T-019
+- Dikerjakan: Membaca PRD, arsitektur, rencana kerja, progress tracker, dan implementasi yang ada. Melanjutkan perubahan lokal SanitizerPreview/sanitize yang belum di-commit; area sensor sekarang benar-benar dimosaikkan atau diblok hitam, bbox di-clamp dan bbox kosong dilewati, pratinjau memakai object URL yang dibersihkan, nama unduhan generik, serta klaim skor 0 dihapus karena hasil belum dianalisis ulang.
+- Hasil/verifikasi: Belum dijalankan pada sesi ini; perubahan masih perlu build, unit test sanitize, dan uji metadata gambar hasil sesuai acceptance T-017–T-019.
+- Belum selesai: Uji ekspor tanpa EXIF, visual bbox pada berbagai rasio gambar, penanganan error browser, dan penilaian ulang skor versi aman.
+- Keputusan: Tidak mengarang skor hasil sanitasi; UI menyatakan perlu analisis ulang.
+- Blocker/pertanyaan: —
+- Commit: —
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)
 - Dikerjakan:
