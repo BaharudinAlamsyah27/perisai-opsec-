@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UploadCloud, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
+import { getQuickFileFingerprint, sameQuickFileFingerprint } from '../utils/quickFileFingerprint';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -9,10 +10,17 @@ export const UploadZone: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [duplicateChoice, setDuplicateChoice] = useState<{
+    all: File[];
+    unique: File[];
+    duplicateCount: number;
+  } | null>(null);
   const addFiles = useAnalysisStore((state) => state.addFiles);
+  const existingFiles = useAnalysisStore((state) => state.files);
 
-  const processFiles = (selectedFiles: FileList | File[]) => {
+  const processFiles = async (selectedFiles: FileList | File[]) => {
     setErrorMessage(null);
+    setDuplicateChoice(null);
     const validFiles: File[] = [];
 
     Array.from(selectedFiles).forEach((file) => {
@@ -40,7 +48,32 @@ export const UploadZone: React.FC = () => {
     });
 
     if (validFiles.length > 0) {
-      addFiles(validFiles);
+      try {
+        const existingFingerprints = await Promise.all(
+          existingFiles.map((item) => getQuickFileFingerprint(item.file))
+        );
+        const incomingFingerprints = await Promise.all(validFiles.map(getQuickFileFingerprint));
+        const known = [...existingFingerprints];
+        const unique: File[] = [];
+        let duplicateCount = 0;
+
+        incomingFingerprints.forEach((fingerprint, index) => {
+          if (known.some((candidate) => sameQuickFileFingerprint(candidate, fingerprint))) {
+            duplicateCount += 1;
+          } else {
+            known.push(fingerprint);
+            unique.push(validFiles[index]);
+          }
+        });
+
+        if (duplicateCount > 0) {
+          setDuplicateChoice({ all: validFiles, unique, duplicateCount });
+        } else {
+          addFiles(validFiles);
+        }
+      } catch {
+        setErrorMessage('Berkas tidak dapat diperiksa untuk duplikat. Coba pilih ulang berkasnya.');
+      }
     }
   };
 
@@ -112,10 +145,38 @@ export const UploadZone: React.FC = () => {
           </div>
           <div className="inline-flex items-center space-x-1.5 text-xs text-cyan-300/80 bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-800/40 font-mono">
             <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
-            <span>KONTROL OPSEC MILITER • 100% PROSES LOKAL BROWSER</span>
+          <span>KONTROL OPSEC MILITER • ANALISIS DI PERANGKAT</span>
           </div>
         </div>
       </div>
+
+      {duplicateChoice && (
+        <div className="mt-3 rounded-xl border border-amber-700/70 bg-amber-950/40 p-4 text-sm text-amber-100" role="status">
+          <p>{duplicateChoice.duplicateCount} foto tampak seperti duplikat berdasarkan nama, ukuran, dan sidik berkas cepat. Apa yang ingin dilakukan?</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (duplicateChoice.unique.length > 0) addFiles(duplicateChoice.unique);
+                setDuplicateChoice(null);
+              }}
+              className="rounded-lg border border-amber-500/60 px-3 py-1.5 text-xs font-semibold hover:bg-amber-900/60"
+            >
+              Lewati yang duplikat
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                addFiles(duplicateChoice.all);
+                setDuplicateChoice(null);
+              }}
+              className="rounded-lg border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800"
+            >
+              Tetap tambahkan semua
+            </button>
+          </div>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="mt-3 p-3 bg-rose-950/60 border border-rose-800/80 rounded-xl text-rose-300 text-xs flex items-center space-x-2 font-mono">

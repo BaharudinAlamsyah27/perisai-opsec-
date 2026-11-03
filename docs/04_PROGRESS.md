@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2 dan I3 selesai; I4 orientasi globe dan test konversi diterapkan, lanjut I5**
+**Posisi terakhir: Checkpoint I — I1 diterapkan (browser verification pending), I2–I4 selesai; I5 deteksi duplikat dan pilihan pengguna diterapkan, lanjut I6**
 
 **Terakhir diperbarui:** 3 Nov 2026 oleh AG · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -114,6 +114,14 @@ Format:
 - Belum selesai: Pemeriksaan visual globe di browser masih menunggu uji browser lokal.
 - Keputusan: —
 - Blocker/pertanyaan: Uji visual marker/rotasi langsung di UI masih tertunda bersama I1.
+- Commit: menunggu
+
+### 3 Nov 2026 — Codex — Checkpoint I5 (duplikat unggahan)
+- Dikerjakan: Membuat sidik berkas cepat dari nama ternormalisasi, ukuran, dan sampel lokal awal/tengah/akhir. Unggahan yang cocok menampilkan pilihan “Lewati yang duplikat” atau “Tetap tambahkan semua”.
+- Hasil/verifikasi: Unit test sidik berkas dan test komponen untuk kedua pilihan.
+- Belum selesai: —
+- Keputusan: Tidak ada data berkas yang dikirim; hash dihitung di browser.
+- Blocker/pertanyaan: —
 - Commit: menunggu
 
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #7 (Task T-016: Overlay BBox Temuan Interaktif)
