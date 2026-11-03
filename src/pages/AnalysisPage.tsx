@@ -27,16 +27,18 @@ export const AnalysisPage: React.FC = () => {
       </section>
 
       {/* Hero: Command Center OPSEC (Upload Zone + 3D Tactical Globe) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        <div className="lg:col-span-8">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-8 flex flex-col">
           <UploadZone />
         </div>
-        <div className="lg:col-span-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
-          <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80 text-[10px] font-mono text-cyan-400">
+        <div className="lg:col-span-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+          <div className="w-full flex items-center justify-between pb-2 mb-1 border-b border-slate-800/80 text-[10px] font-mono text-cyan-400">
             <span>GLOBE GEOLOKASI (WASM)</span>
             <span className="text-slate-500">OFFLINE 3D</span>
           </div>
-          <GlobeHero targetLocation={targetGPS} />
+          <div className="flex-1 flex items-center justify-center py-1">
+            <GlobeHero targetLocation={targetGPS} />
+          </div>
         </div>
       </section>
 

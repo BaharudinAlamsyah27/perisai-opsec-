@@ -76,6 +76,15 @@ Format:
 - Commit: ...
 ```
 
+### 3 Nov 2026 — AG (Antigravity) — Sesi #6 (GlobeHero Polish & Layout Alignment)
+- Dikerjakan:
+  1. Kontras titik benua pada GlobeHero ditingkatkan signifikan (`mapBrightness: 14`, `mapBaseBrightness: 0.12`, `baseColor: [0.15, 0.45, 0.58]`, `diffuse: 1.6`) sehingga kontur benua terbaca jelas, tegas, dan berkelas.
+  2. Status label di bawah globe disesuaikan dengan instruksi: "MENUNGGU DATA GPS DARI FOTO" (monospace) saat standby, dan format koordinat presisi saat GPS terdeteksi.
+  3. Penyelarasan tinggi layout desktop (`items-stretch`) antara zona unggah dan panel globe untuk mengeliminasi ruang kosong berlebih.
+  4. Verifikasi animasi idle putaran pelan, berhenti saat `document.hidden` atau `prefers-reduced-motion`.
+- Hasil/verifikasi: `npm test` 39/39 passed, `npm run lint` 0 warning/error, `npm run build` sukses.
+- Commit: fix(visual): enhance globe contrast, status label, and layout alignment
+
 ### 3 Nov 2026 — AG (Antigravity) — Sesi #5 (Task T-015: Analisis Caption & Safe Rewrites)
 - Dikerjakan:
   1. Engine penulisan ulang aman (`src/engine/captionRewriter.ts`): menghasilkan template penulisan ulang aman militer (*Dukungan Moral & Semangat*, *Dokumentasi Pasca-Kegiatan*, *Sensor Otomatis/Redacted*, dan *Persona Keluarga Prajurit*).
