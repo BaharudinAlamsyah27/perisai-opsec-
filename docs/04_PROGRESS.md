@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir: Checkpoint Q (Q1–Q5) diimplementasikan dan diverifikasi. `npm test` 111/111, lint, build lulus; teks contoh mendapat skor 20–35 tanpa severity critical; dataset 03/04/05/08 tetap lulus tanpa temuan `mil-*` baru. Commit per butir belum aman karena perubahan lama masih bercampur di working tree; izin `.git/index.lock` sebelumnya ditolak.**
+**Posisi terakhir (4 Nov 2026): Audit R0 selesai; P5 dievaluasi dan dipangkas sesuai batas ukuran di spesifikasi. K-diagnosa, Q, L, M, dan N terverifikasi; K, P1–P4, dan O sebagian. `npm test` 32 file/111 tes lulus, lint dan build lulus (chunk utama 572.17 kB). Berikutnya: tuntaskan QA manual O2/O3.**
 
 **Terakhir diperbarui:** 4 Nov 2026 oleh Codex · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -11,8 +11,8 @@
 | Registrasi hackathon | ⬜ Belum | T-000 |
 | Repo & scaffold | ✅ Selesai | T-001/T-002 |
 | P0 (MVP) | T-002–T-021 implementasi tersedia dan T-017–T-019 terverifikasi; T-022 gate masih pending | Gerbang: 9 Nov |
-| P1 (Pembeda) | 3 / 5 checkpoint | Checkpoint L, M, dan N selesai; gerbang: 11 Nov |
-| QA | 🔄 | O2: suite lulus; ukuran layar/network manual belum terverifikasi |
+| P1 (Pembeda) | ✂️ | L/M/N selesai-terverifikasi; P5 dipangkas oleh batas ukuran; P1–P4 audit parsial |
+| QA | 🔄 | Suite lulus; O2 ukuran layar dan O3 Network/offline/CSP belum terverifikasi manual |
 | Deploy publik | 🔄 | O6: konfigurasi Netlify/Vercel tersedia; deploy belum dilakukan |
 | Aset submission | ⬜ | 13 Nov |
 | Submit | ⬜ | 14 Nov |
@@ -74,10 +74,33 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 
 **Checkpoint O:** O1 menyertakan 5 foto demo dan 8 foto pola sintetis (797,177 byte total) dengan label fiktif serta tombol muat contoh. O4 membuat 27 dependency/license records dari `package.json` dan `node_modules`, deklarasi AI, dan keterangan contoh fiktif. O5 README memuat fitur, setup 3 langkah, arsitektur, privasi, batasan, kredit, serta panduan deploy. O6 memeriksa konfigurasi Netlify/Vercel dan menambahkan security headers untuk Vite preview. O2 test otomatis lulus; hasil QA dirangkum di log sesi berikut. O3 source audit tidak menemukan upload foto/caption; uji browser Network/offline dan respons CSP belum dapat diamati.
 
-**Berikutnya yang harus dikerjakan:** PO tinjau dan commit perubahan J–O, K-diagnosa, dan Q secara terpisah; selesaikan QA browser responsive/Network/offline yang tertunda, lalu lanjut T-022 gerbang review P0.
+### Audit R0 — 4 Nov 2026
+
+| Checkpoint | Status | Bukti | Yang kurang |
+|---|---|---|---|
+| K | Sebagian | `tests/engine/sanitize.test.ts` membuktikan EXIF hilang dan tiga gaya sensor; `tests/engine/syntheticDataset.test.ts` menguji 01–09; `tests/engine/ocr.test.ts` menguji file bukan gambar | Verifikasi end-to-end kasus 10 serta QA manual K2/layout dan hasil sanitasi pada setiap fixture belum dibuktikan dalam tes integrasi |
+| K-diagnosa | Selesai-terverifikasi | `OcrTextPanel.tsx`, `AnalysisCoverage.tsx`, `ocr.worker.ts`, `ocrMerge.test.ts`, `OcrTransparency.test.tsx`; 3 lintasan OCR dan coverage diuji | D6 aturan nama file memang opsional dan tidak dikerjakan |
+| P1–P4 | Sebagian | `kamus-konteks-militer.json`, `rules.test.ts`, upload zone dan OCR menunjukkan kamus/penanda konteks serta OCR tersedia | Catatan metadata yang hilang akibat kompresi sosial dan tips khusus zona unggah tidak ditemukan; cakupan checkpoint ini belum lengkap |
+| Q | Selesai-terverifikasi | `rules.test.ts` Q2/Q5 dan tes konteks; `ContextSummary.test.tsx`; suite memastikan skor konteks, publikasi, dan regresi dataset 03/04/05/08 | Tidak ada kekurangan fungsional yang terlihat pada audit kode |
+| L | Selesai-terverifikasi | `src/engine/brief.ts`, `brief-templates.json`, `BriefIntel.tsx`, `tests/engine/brief.test.ts` menguji sumber ID untuk setiap klaim | Uji cetak visual belum manual |
+| M | Selesai-terverifikasi | `src/engine/pattern.ts`, `PatternPage.tsx`, `tests/engine/pattern.test.ts` dan `PatternPage.test.tsx`; tiga klaster, dua rutinitas, transisi tiga kali, tanpa GPS/waktu | Uji visual browser belum manual |
+| N | Selesai-terverifikasi | `src/engine/dik.ts`, `DikPage.tsx`, `useDikStore.ts`, integrasi `rules.ts`; tes rules dan `DikPage.test.tsx` mencakup normalisasi, kategori/skor, impor dan UI | Tidak ada kekurangan fungsional yang terlihat pada audit kode |
+| P5 | Belum (R1 dipangkas) | Evaluasi package MediaPipe Tasks Vision v1.2.2: satu WASM yang diperlukan 14,603,354 byte, loader 334,128 byte, dan model BlazeFace resmi 229,746 byte = 15,167,228 byte sebelum kode integrasi. Sudah melewati batas tambahan 15 MB pada spesifikasi | Deteksi wajah, sanitizer, panel cakupan, dan test tidak dibuat; fitur tetap di luar build sesuai hard stop P5 |
+| O | Sebagian | Tombol/sampel ada (`UploadZone.tsx`, `PatternPage.tsx`, `public/samples`, 797,177 byte); `AboutPage.tsx`, `licenses.mjs`, README, `netlify.toml`, `vercel.json` tersedia | O2 lima ukuran layar belum diuji visual; O3 Network, mode offline, dan CSP response belum terverifikasi manual |
+
+Audit gate R0: `git log --oneline -15` menunjukkan Q committed pada `2d35ebc`; `npm test` 32 file/111 tes lulus; `npm run lint` lulus; `npm run build` lulus dengan peringatan chunk utama 572.17 kB (>500 kB). Worktree hanya memiliki `docs/07_CHECKPOINT_LANJUTAN.md` untracked (spesifikasi PO), tidak ada perubahan kode lokal yang tertinggal. Tidak ada upaya push.
+
+**Berikutnya:** O adalah checkpoint selanjutnya pada antrean setelah P5 dipangkas. Selesaikan O2/O3 dengan verifikasi browser produksi; ukuran layar 1920/1366/1024/768/390 px masih belum diuji visual.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
+### 4 Nov 2026 — Codex — Audit R0 dan evaluasi P5
+- Audit R0 — Menjalankan `git log --oneline -15`, `npm test` (32 file, 111/111), `npm run lint`, dan `npm run build` (sukses; chunk utama 572.17 kB, peringatan Vite >500 kB). Bukti per checkpoint dan kekurangan dicatat pada tabel Audit R0 di atas.
+- P5 — Memeriksa package dan model resmi MediaPipe. Tasks Vision memakai Apache-2.0; paket memerlukan WASM 14,603,354 byte dan loader 334,128 byte. Model BlazeFace short-range resmi berukuran 229,746 byte, sehingga jumlah aset lokal wajib sekitar 15.17 MB sebelum integrasi JS. Sesuai hard stop P5 (>15 MB tambahan), checkpoint dipangkas. Dependency tidak dipertahankan; tidak ada file model/WASM ditambahkan.
+- Privasi — Dokumentasi resmi MediaPipe menyatakan pemrosesan input di perangkat, tetapi juga menjelaskan SDK mengirim metrik performa/penggunaan. Karena proyek melarang analytics/runtime request baru, integrasi tidak dilanjutkan tanpa jalur telemetry-free yang terverifikasi.
+- Blocker commit — `git restore` dan `git add docs/04_PROGRESS.md` ditolak karena `.git/index.lock` Permission denied. Tidak dicoba menghindari izin; dependency/lockfile dikembalikan manual. Perubahan progress audit menunggu commit manual PO.
+- Berikutnya: lanjut O2/O3 QA produksi dan responsive; P1–P4 dan K juga masih memiliki celah yang ditandai pada tabel audit.
+
 ### 4 Nov 2026 — Codex — Checkpoint Q: bobot konteks publikasi kegiatan
 - Q1 — Meninjau ulang panel Teks terbaca/log dan lintasan yang ditambahkan di K-diagnosa: worker menjalankan gambar asli skala maks 2400 px/PSM otomatis, grayscale-kontras/PSM otomatis, dan invert/PSM 11; log tiap lintasan, jumlah kata, ukuran, kegagalan praproses dan durasi. Tidak ada foto milik pihak lain ditambahkan. Dataset sintetis OCR 03/04/05/08 lulus regresi.
 - Q2 — Kamus konteks mengatur operasi, teritorial, rawan konflik, satgas, penugasan, patroli, pengamanan sebagai severity low; perbatasan medium; TNI, Tentara Nasional Indonesia, Dirgahayu info (skor nol). Temuan kegiatan memakai alasan persis: “Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah.”
