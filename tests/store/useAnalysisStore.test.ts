@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useAnalysisStore } from '../../src/store/useAnalysisStore';
 import type { AnalysisFile, Finding } from '../../src/types';
 
@@ -37,5 +37,21 @@ describe('analysis profile score logs', () => {
     const lastLog = updated.logs?.[updated.logs.length - 1];
     expect(lastLog?.message).toContain('Profil diganti ke Keluarga. Skor risiko: 26/100');
     expect(useAnalysisStore.getState().activeProfile).toBe('keluarga');
+  });
+
+  it('clears the session files and revokes their local preview URLs', () => {
+    const revokeObjectURL = vi.fn();
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
+    const file: AnalysisFile = {
+      id: 'clear-test', file: new File(['synthetic'], 'clear.png'), previewUrl: 'blob:clear',
+      name: 'clear.png', size: 9, type: 'image/png', status: 'done',
+    };
+    useAnalysisStore.setState({ files: [file], activeFileId: file.id, activeProfile: 'prajurit' });
+
+    useAnalysisStore.getState().clearAll();
+
+    expect(useAnalysisStore.getState().files).toEqual([]);
+    expect(useAnalysisStore.getState().activeFileId).toBeNull();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:clear');
   });
 });

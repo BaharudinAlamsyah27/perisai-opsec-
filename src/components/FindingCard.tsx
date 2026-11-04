@@ -1,11 +1,14 @@
 import React from 'react';
 import { Finding, Severity } from '../types';
-import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle, Crosshair } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle, Crosshair, ChevronDown } from 'lucide-react';
 
 interface FindingCardProps {
   finding: Finding;
   isHovered?: boolean;
   onHover?: (id: string | null) => void;
+  onSelect?: (id: string) => void;
+  compact?: boolean;
+  idPrefix?: string;
 }
 
 const SEVERITY_CONFIG: Record<
@@ -48,14 +51,33 @@ export const FindingCard: React.FC<FindingCardProps> = ({
   finding,
   isHovered = false,
   onHover,
+  onSelect,
+  compact = false,
+  idPrefix = '',
 }) => {
+  const [expanded, setExpanded] = React.useState(false);
   const config = SEVERITY_CONFIG[finding.severity] ?? SEVERITY_CONFIG.info;
   const hasBbox = Boolean(finding.bbox);
 
   return (
-    <div
+    <article
+      id={idPrefix ? `finding-${idPrefix}-${finding.id}` : `finding-${finding.id}`}
       onMouseEnter={() => onHover?.(finding.id)}
       onMouseLeave={() => onHover?.(null)}
+      onClick={() => {
+        onSelect?.(finding.id);
+        if (compact) setExpanded((value) => !value);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect?.(finding.id);
+          setExpanded((value) => !value);
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-expanded={compact ? expanded : undefined}
       className={`border rounded-xl p-4 transition-all duration-200 cursor-default ${
         isHovered
           ? 'border-cyan-400 bg-cyan-950/30 shadow-[0_0_15px_rgba(6,182,212,0.25)] scale-[1.008]'
@@ -73,18 +95,22 @@ export const FindingCard: React.FC<FindingCardProps> = ({
           <span className="text-xs text-slate-400 uppercase font-mono tracking-wider">
             [{finding.category}] • {finding.source}
           </span>
+          {finding.ruleId.startsWith('dik-') && <span className="rounded border border-fuchsia-700/60 bg-fuchsia-950/40 px-2 py-0.5 text-[9px] font-mono font-bold tracking-wide text-fuchsia-200">Dari Daftar Informasi Kritis</span>}
         </div>
 
+        <div className="flex items-center gap-2">
         {hasBbox && (
           <div className="flex items-center space-x-1 text-[10px] font-mono text-cyan-400 bg-cyan-950/50 border border-cyan-800/50 px-2 py-0.5 rounded">
             <Crosshair className="w-3 h-3 text-cyan-400 animate-pulse" />
             <span>SOROT VISUAL</span>
           </div>
         )}
+        {compact && <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />}
+        </div>
       </div>
 
       {/* Evidence */}
-      <div className="mb-2 bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 font-mono text-xs text-cyan-300 break-words flex items-center justify-between">
+      <div className="mb-2 px-1 py-1 font-mono text-xs text-cyan-300 break-words flex items-center justify-between">
         <div>
           <span className="text-slate-400 font-sans block text-[10px] uppercase tracking-wide">
             Bukti Temuan:
@@ -93,6 +119,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
         </div>
       </div>
 
+      {!compact || expanded ? <>
       {/* Reason */}
       <div className="text-xs text-slate-300 mb-2 leading-relaxed">
         <strong className="text-slate-200">Alasan Risiko: </strong>
@@ -107,6 +134,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
           {finding.recommendation}
         </div>
       </div>
-    </div>
+      </> : <p className="truncate text-xs text-slate-300">{finding.reason}</p>}
+    </article>
   );
 };

@@ -34,9 +34,13 @@ describe('RiskReport', () => {
     render(<RiskReport file={file} profile="prajurit" />);
 
     expect(screen.getByText('60/100 — Tinggi')).toBeInTheDocument();
-    expect(screen.getByText(/Koordinat sintetis/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Koordinat sintetis/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Koordinat dapat mengungkap/)).toBeInTheDocument();
-    expect(screen.getByText(/Hapus metadata GPS/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Hapus metadata GPS/).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'BRIEF INTELIJEN LAWAN' })).toBeInTheDocument();
+    expect(screen.getByText(/Brief ini disusun otomatis dari temuan/)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: '[report-finding]' }).length).toBeGreaterThan(0);
+    expect(document.getElementById('risk-finding-report-finding')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cetak / Simpan PDF' }));
     expect(print).toHaveBeenCalledOnce();
   });

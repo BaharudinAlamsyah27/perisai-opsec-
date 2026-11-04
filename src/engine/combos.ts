@@ -18,7 +18,10 @@ export function applyComboBoost(findings: Finding[]): Finding[] {
   const detectedGroups = new Set<string>();
 
   for (const f of findings) {
-    const group = comboGroups[f.ruleId];
+    const dikGroup = f.ruleId.startsWith('dik-satuan-') ? 'satuan'
+      : f.ruleId.startsWith('dik-lokasi-') ? 'lokasi'
+        : f.ruleId.startsWith('dik-kegiatan-') ? 'pergerakan' : undefined;
+    const group = dikGroup ?? comboGroups[f.ruleId];
     if (group && TARGET_OPERATIONAL_GROUPS.has(group)) {
       detectedGroups.add(group);
     }
@@ -28,7 +31,7 @@ export function applyComboBoost(findings: Finding[]): Finding[] {
   if (detectedGroups.size >= 3) {
     const groupList = Array.from(detectedGroups).join(', ');
     const syntheticFinding: Finding = {
-      id: `combo-pola-penugasan-${Date.now()}`,
+      id: 'combo-pola-penugasan',
       ruleId: 'combo-pola-penugasan',
       category: 'operasional',
       severity: 'critical',

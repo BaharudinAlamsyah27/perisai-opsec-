@@ -1,4 +1,5 @@
 import { Finding, RiskLevel, Profile, Score, Severity, Category } from '../types';
+import { isPublicContextFinding } from './rules';
 
 export const BASE_PROBABILITY: Record<Severity, number> = {
   critical: 0.60,
@@ -52,14 +53,23 @@ export function calculateScore(findings: Finding[], profile: Profile = 'prajurit
 
   let productNoisyOr = 1.0;
   const multipliers = PROFILE_MULTIPLIERS[profile];
+  let strongestPublicContextProbability = 0;
 
   for (const finding of findings) {
     const baseP = BASE_PROBABILITY[finding.severity] ?? 0;
     const categoryMult = multipliers[finding.category] ?? 1.0;
     const effectiveProbability = Math.min(1.0, Math.max(0, baseP * categoryMult));
 
-    productNoisyOr *= (1.0 - effectiveProbability);
+    if (isPublicContextFinding(finding)) {
+      // Multiple words from the same publication context are correlated signals;
+      // count the strongest one once so repeated wording does not inflate risk.
+      strongestPublicContextProbability = Math.max(strongestPublicContextProbability, effectiveProbability);
+    } else {
+      productNoisyOr *= (1.0 - effectiveProbability);
+    }
   }
+
+  productNoisyOr *= 1.0 - strongestPublicContextProbability;
 
   const rawScore = 100 * (1.0 - productNoisyOr);
   const clampedScore = Math.min(100, Math.max(0, Math.round(rawScore)));

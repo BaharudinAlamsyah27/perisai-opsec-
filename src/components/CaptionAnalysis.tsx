@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { analyzeText } from '../engine/rules';
 import { generateSafeRewrites, RewriteSuggestion } from '../engine/captionRewriter';
+import { useDikStore } from '../store/useDikStore';
+import { useCaptionStore } from '../store/useCaptionStore';
 import { MessageSquareText, ShieldAlert, ShieldCheck, Copy, Check, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface CaptionAnalysisProps {
@@ -8,10 +10,12 @@ interface CaptionAnalysisProps {
 }
 
 export const CaptionAnalysis: React.FC<CaptionAnalysisProps> = ({ className = '' }) => {
-  const [caption, setCaption] = useState<string>('');
+  const dikEntries = useDikStore((state) => state.entries);
+  const caption = useCaptionStore((state) => state.caption);
+  const setCaption = useCaptionStore((state) => state.setCaption);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const findings = caption.trim().length > 0 ? analyzeText(caption, 'caption') : [];
+  const findings = caption.trim().length > 0 ? analyzeText(caption, 'caption', undefined, dikEntries) : [];
   const rewrites: RewriteSuggestion[] = generateSafeRewrites(caption, findings);
 
   const handleCopy = (text: string, index: number) => {
@@ -104,7 +108,7 @@ export const CaptionAnalysis: React.FC<CaptionAnalysisProps> = ({ className = ''
             ) : (
               <span className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-emerald-950/60 border border-emerald-500/50 text-emerald-300">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>TEKS AMAN</span>
+                <span>TIDAK ADA KECOCOKAN ATURAN</span>
               </span>
             )}
           </div>

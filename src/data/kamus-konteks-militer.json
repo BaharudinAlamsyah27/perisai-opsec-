@@ -1,0 +1,58 @@
+[
+  {
+    "id": "mil-teritorial",
+    "term": "teritorial",
+    "category": "operasional",
+    "severity": "low",
+    "reason": "Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah."
+  },
+  {
+    "id": "mil-rawan-konflik",
+    "term": "rawan konflik",
+    "category": "lokasi",
+    "severity": "low",
+    "reason": "Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah."
+  },
+  {
+    "id": "mil-pengamanan",
+    "term": "pengamanan",
+    "category": "operasional",
+    "severity": "low",
+    "reason": "Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah."
+  },
+  {
+    "id": "mil-apel",
+    "term": "apel",
+    "category": "operasional",
+    "severity": "low",
+    "reason": "Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah."
+  },
+  {
+    "id": "mil-personel",
+    "term": "personel",
+    "category": "operasional",
+    "severity": "low",
+    "reason": "Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah."
+  },
+  {
+    "id": "mil-tni",
+    "term": "TNI",
+    "category": "operasional",
+    "severity": "info",
+    "reason": "Penanda konteks institusi umum; periksa apakah kegiatan ini sudah diumumkan resmi."
+  },
+  {
+    "id": "mil-tentara-nasional-indonesia",
+    "term": "Tentara Nasional Indonesia",
+    "category": "operasional",
+    "severity": "info",
+    "reason": "Penanda konteks institusi umum; periksa apakah kegiatan ini sudah diumumkan resmi."
+  },
+  {
+    "id": "mil-dirgahayu",
+    "term": "Dirgahayu",
+    "category": "operasional",
+    "severity": "info",
+    "reason": "Penanda perayaan umum; tidak menunjukkan kebocoran operasional dengan sendirinya."
+  }
+]

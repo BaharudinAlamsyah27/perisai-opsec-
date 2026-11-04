@@ -11,7 +11,7 @@ export const AnalysisConsole: React.FC<AnalysisConsoleProps> = ({ logs, classNam
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView?.({ behavior: 'smooth' });
   }, [logs]);
 
   return (

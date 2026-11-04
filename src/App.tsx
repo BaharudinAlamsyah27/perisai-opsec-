@@ -5,6 +5,7 @@ import { PatternPage } from './pages/PatternPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { AboutPage } from './pages/AboutPage';
 import { AnalysisPage } from './pages/AnalysisPage';
+import { DikPage } from './pages/DikPage';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('analisis');
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'analisis' && <AnalysisPage />}
         {activeTab === 'pola-hidup' && <PatternPage />}
+        {activeTab === 'dik' && <DikPage />}
         {activeTab === 'privasi' && <PrivacyPage />}
         {activeTab === 'tentang' && <AboutPage />}
       </main>

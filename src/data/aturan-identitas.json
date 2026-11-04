@@ -20,7 +20,7 @@
   {
     "id": "id-phone",
     "name": "Nomor Telepon Seluler",
-    "pattern": "\\b(?:\\+62|62|08)[0-9]{8,12}\\b",
+    "pattern": "\\b(?:\\+62|62|08)(?:[ -]?\\d){8,12}\\b",
     "severity": "medium",
     "category": "identitas",
     "reason": "Nomor telepon seluler Indonesia terdeteksi. Berisiko social engineering dan spam target.",

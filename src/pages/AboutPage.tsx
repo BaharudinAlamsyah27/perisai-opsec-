@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Award, BookOpen, Code2 } from 'lucide-react';
+import licenses from '../data/licenses.json';
 
 export const AboutPage: React.FC = () => {
   return (
@@ -61,23 +62,16 @@ export const AboutPage: React.FC = () => {
             <Code2 className="w-5 h-5 text-sky-400" />
             <span>Kredit Komponen Open Source & Deklarasi AI</span>
           </h2>
-          <p className="text-xs text-slate-400 mb-3">
-            Dibangun dengan teknologi berlisensi terbuka (MIT / ISC / BSD):
-          </p>
-          <ul className="text-xs text-slate-300 space-y-1 font-mono">
-            <li>• React & TypeScript (MIT) — Antarmuka reaktif dan pengetikan ketat</li>
-            <li>• Vite & Tailwind CSS (MIT) — Bundler cepat dan tata letak responsif</li>
-            <li>• Zustand (MIT) — Manajemen state client-side ringan</li>
-            <li>• exifr (MIT) — Pengurai metadata EXIF/GPS berkinerja tinggi</li>
-            <li>• Tesseract.js &amp; Tesseract.js Core (Apache-2.0) — OCR lokal berbasis WebAssembly</li>
-            <li>• tessdata_fast Indonesia &amp; Inggris (Apache-2.0) — Model bahasa OCR yang dihosting lokal</li>
-            <li>• Cobe (MIT) — Visualisasi globe geolokasi</li>
-            <li>• Leaflet & OpenStreetMap (BSD-2-Clause / ODbL) — Visualisasi peta geospasial offline-ready</li>
-            <li>• Lucide React (ISC) — Ikon antarmuka pengguna</li>
+          <p className="text-xs text-slate-400 mb-3">Daftar dependency dari package.json dan lisensi yang ditemukan di node_modules. Jalankan <code>npm run licenses</code> setelah dependency berubah.</p>
+          <ul className="grid gap-1 text-xs text-slate-300 font-mono sm:grid-cols-2">
+            {licenses.dependencies.map((dependency) => <li key={dependency.name} className="rounded border border-slate-700/70 bg-slate-900/50 px-2 py-1">{dependency.name} <span className="text-slate-500">v{dependency.version}</span> · {dependency.license}</li>)}
           </ul>
+          <p className="mt-3 text-xs text-slate-400">Aset dan layanan terkait:</p>
+          <ul className="text-xs text-slate-300 space-y-1 font-mono">{licenses.bundledAssets.map((asset) => <li key={asset.name}>• {asset.name} — {asset.license}; {asset.source}</li>)}</ul>
           <div className="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400">
             <strong>Deklarasi AI:</strong> Proyek ini dirancang dan dikembangkan dengan bantuan AI coding assistant (Antigravity & Codex) selama periode resmi kompetisi. Seluruh aturan keamanan dan kode sumber diverifikasi serta diuji secara ketat.
           </div>
+          <div className="mt-3 text-xs text-slate-400"><strong>Data contoh:</strong> semua foto contoh di aplikasi dibuat secara sintetis. Nama, tulisan, dan metadata pada contoh bersifat fiktif.</div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Shield, ShieldAlert, Lock, Info, Activity } from 'lucide-react';
+import { Shield, ShieldAlert, Lock, Info, Activity, ListChecks } from 'lucide-react';
 
-export type ActiveTab = 'analisis' | 'pola-hidup' | 'privasi' | 'tentang';
+export type ActiveTab = 'analisis' | 'pola-hidup' | 'dik' | 'privasi' | 'tentang';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -63,6 +63,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onTabChange }) => {
               <span className="text-[9px] px-1 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded font-mono">
                 P1
               </span>
+            </button>
+
+            <button
+              onClick={() => onTabChange('dik')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                activeTab === 'dik'
+                  ? 'bg-cyan-950/60 text-cyan-300 border border-cyan-500/60'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              <span>DAFTAR KRITIS</span>
             </button>
 
             <button

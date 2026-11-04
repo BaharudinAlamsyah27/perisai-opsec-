@@ -71,6 +71,8 @@ export interface AnalysisFile {
   type: string;
   exif?: ExifData;
   ocrWords?: OcrWord[];
+  ocrStatus?: 'recognized' | 'empty' | 'error' | 'skipped';
+  ocrDurationMs?: number;
   ocrProgress?: number;
   logs?: AnalysisLog[];
   score?: Score;

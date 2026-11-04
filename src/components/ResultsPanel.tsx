@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { AnalysisFile, RiskLevel } from '../types';
 import { FindingCard } from './FindingCard';
 import { LeafletMap } from './LeafletMap';
 import { ScoreGauge } from './ScoreGauge';
 import { RiskRadar } from './RiskRadar';
-import { ShieldCheck, UserCheck, Users, Building2 } from 'lucide-react';
+import { UserCheck, Users, Building2 } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { PROFILE_MULTIPLIERS } from '../engine/scoring';
 import { RiskReport } from './RiskReport';
+import { AnalysisCoverage } from './AnalysisCoverage';
+import { OcrTextPanel } from './OcrTextPanel';
+import { isContextOnlyFindings, isPublicContextFinding } from '../engine/rules';
 
 interface ResultsPanelProps {
   file: AnalysisFile;
   hoveredFindingId?: string | null;
   onHoverFinding?: (id: string | null) => void;
+  view?: 'score' | 'findings' | 'metadata' | 'report' | 'all';
+  onSelectFinding?: (id: string) => void;
+  findingIdPrefix?: string;
+  fixedFindingsHeight?: boolean;
 }
 
 const LEVEL_STYLE: Record<
@@ -58,6 +65,8 @@ const CATEGORY_LABELS = {
   teknis: 'Teknis',
 } as const;
 
+const SEVERITY_RANK = { critical: 0, high: 1, medium: 2, low: 3, info: 4 } as const;
+
 function profileWeightsDescription(profile: keyof typeof PROFILE_MULTIPLIERS): string {
   const weights = PROFILE_MULTIPLIERS[profile];
   const categories = Object.keys(CATEGORY_LABELS) as Array<keyof typeof CATEGORY_LABELS>;
@@ -68,17 +77,37 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   file,
   hoveredFindingId = null,
   onHoverFinding,
+  view = 'all',
+  onSelectFinding,
+  findingIdPrefix,
+  fixedFindingsHeight = false,
 }) => {
   const { activeProfile, setActiveProfile } = useAnalysisStore();
   const score = file.score ?? { value: 0, level: 'Aman', findings: [] };
   const style = LEVEL_STYLE[score.level] ?? LEVEL_STYLE.Aman;
+  const contextOnly = isContextOnlyFindings(score.findings);
+  const contextLabel = contextOnly && score.value > 0 && score.value < 50 ? 'Perlu verifikasi publikasi' : undefined;
 
   const hasGPS = file.exif?.latitude !== undefined && file.exif?.longitude !== undefined;
+  const [category, setCategory] = useState<'semua' | keyof typeof CATEGORY_LABELS>('semua');
+  const [metadataOpen, setMetadataOpen] = useState(true);
+  const orderedFindings = useMemo(() => [...score.findings].sort((a, b) => {
+    const sourceRank = (source: string) => source === 'metadata' ? 1 : 0;
+    return sourceRank(a.source) - sourceRank(b.source)
+      || SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity];
+  }), [score.findings]);
+  const visibleFindings = orderedFindings.filter((finding) => category === 'semua' || finding.category === category);
+  const metadataFindings = visibleFindings.filter((finding) => finding.source === 'metadata');
+  const textFindings = visibleFindings.filter((finding) => finding.source !== 'metadata');
+  const publicContextFindings = textFindings.filter(isPublicContextFinding);
+  const individualTextFindings = publicContextFindings.length >= 3
+    ? textFindings.filter((finding) => !isPublicContextFinding(finding))
+    : textFindings;
 
   return (
     <div className="space-y-6">
       {/* Top Header: Futuristic Score & Radar Dual-HUD */}
-      <div className={`p-6 rounded-2xl border ${style.border} ${style.bg} backdrop-blur relative overflow-hidden shadow-2xl`}>
+      {(view === 'score' || view === 'all') && <div className={`p-6 rounded-2xl border ${style.border} ${style.bg} backdrop-blur relative overflow-hidden shadow-2xl`}>
         {/* HUD Corner Accents */}
         <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-cyan-500/60" />
         <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-cyan-500/60" />
@@ -88,19 +117,19 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           {/* Circular Score Gauge */}
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <ScoreGauge score={score.value} level={score.level} size={150} />
+            <ScoreGauge score={score.value} level={score.level} size={150} levelLabel={contextLabel} />
 
             <div className="space-y-2 text-center sm:text-left max-w-sm">
               <div className="flex items-center justify-center sm:justify-start space-x-2">
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-cyan-400">
                   STATUS EVALUASI
                 </span>
-                <span className={`text-base font-bold font-mono ${style.text}`}>
-                  {score.level.toUpperCase()}
+                <span className={`text-base font-bold font-mono ${contextLabel ? 'text-amber-300' : style.text}`}>
+                  {contextLabel ?? score.level.toUpperCase()}
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                {style.description}
+                {contextLabel ? 'Kecocokan konteks kegiatan ditemukan. Verifikasi status publikasinya sebelum mengunggah.' : style.description}
               </p>
             </div>
           </div>
@@ -166,37 +195,10 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Geolocation Section if GPS present */}
-      {hasGPS && file.exif?.latitude && file.exif?.longitude && (
-        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="text-sm font-semibold text-white flex items-center space-x-2 font-mono">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                <span>PETA KOORDINAT GPS (OPT-IN BROWSER)</span>
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Peta Leaflet dimuat secara lokal dengan perlindungan zero-upload; tile OSM hanya dimuat setelah persetujuan Anda.
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
-                {file.exif.latitude.toFixed(6)}, {file.exif.longitude.toFixed(6)}
-              </span>
-            </div>
-          </div>
-          <LeafletMap
-            latitude={file.exif.latitude}
-            longitude={file.exif.longitude}
-            popupTitle={file.name}
-          />
-        </div>
-      )}
+      </div>}
 
       {/* Findings List */}
-      <div className="space-y-3">
+      {(view === 'findings' || view === 'all') && <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-white flex items-center space-x-2 font-mono tracking-wider">
             <span>DAFTAR TEMUAN KEBOCORAN OPSEC</span>
@@ -204,34 +206,52 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               {score.findings.length}
             </span>
           </h3>
-          <span className="text-xs text-slate-400 font-mono">
-            KATALOG ATURAN DETERMINISTIK
-          </span>
-        </div>
-
-        {score.findings.length === 0 ? (
-          <div className="p-8 text-center bg-slate-950/60 border border-slate-800 rounded-2xl">
-            <ShieldCheck className="w-12 h-12 text-emerald-400 mx-auto mb-2 opacity-80" />
-            <p className="text-sm font-semibold text-white">Tidak Ditemukan Kebocoran Berisiko</p>
-            <p className="text-xs text-slate-400 max-w-md mx-auto mt-1 font-mono">
-              Foto ini bersih dari koordinat GPS, serial nomor perangkat keras, atau teks operasional berisiko.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3">
-            {score.findings.map((finding) => (
-              <FindingCard
-                key={finding.id}
-                finding={finding}
-                isHovered={hoveredFindingId === finding.id}
-                onHover={onHoverFinding}
-              />
+          <div className="flex flex-wrap gap-1" aria-label="Filter kategori temuan">
+            {(['semua', 'lokasi', 'identitas', 'operasional', 'teknis'] as const).map((item) => (
+              <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item}
+                className={`rounded border px-2 py-1 text-[10px] font-mono focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${category === item ? 'border-cyan-500 bg-cyan-950 text-cyan-200' : 'border-slate-700 text-slate-300 hover:bg-slate-800'}`}>
+                {item === 'semua' ? 'Semua' : CATEGORY_LABELS[item]}
+              </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
 
-      <RiskReport file={file} profile={activeProfile} />
+        {visibleFindings.length === 0 ? (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-4 text-center">
+              <p className="text-sm font-semibold text-slate-100">{score.findings.length === 0 ? 'Tidak ada kecocokan aturan pada sumber yang diperiksa.' : 'Tidak ada temuan pada filter kategori ini.'}</p>
+              {score.findings.length === 0 && <p className="mt-1 text-xs text-slate-400">Ini bukan jaminan bahwa seluruh isi foto aman.</p>}
+            </div>
+            {score.findings.length === 0 && file.status === 'done' && <AnalysisCoverage file={file} />}
+          </div>
+        ) : (
+          <div className={`${fixedFindingsHeight ? 'h-[34rem]' : 'max-h-[34rem]'} space-y-2 overflow-y-auto pr-1`} data-testid="findings-scroll">
+            {publicContextFindings.length >= 3 && <article className="rounded-xl border border-amber-700/60 bg-amber-950/25 p-3" aria-label="Konteks kegiatan operasional">
+              <h4 className="font-mono text-xs font-bold text-amber-200">Konteks kegiatan operasional</h4>
+              <p className="mt-1 text-xs text-slate-200">{publicContextFindings.map((finding) => finding.evidence.replace(/ \(keyakinan \d+%\)$/, '')).filter((evidence, index, all) => all.indexOf(evidence) === index).join(' · ')}</p>
+              <p className="mt-2 text-[11px] text-slate-400">Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah.</p>
+              <p className="mt-1 text-[10px] text-slate-500">{publicContextFindings.length} kecocokan konteks digabungkan.</p>
+            </article>}
+            {individualTextFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} />)}
+            {metadataFindings.length > 0 && <section className="space-y-2">
+              <button type="button" aria-expanded={metadataOpen} onClick={() => setMetadataOpen((value) => !value)} className="w-full rounded px-2 py-2 text-left text-sm font-semibold text-cyan-200 hover:bg-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">Metadata ({metadataFindings.length})</button>
+              {metadataOpen && <div className="space-y-2">{metadataFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} />)}</div>}
+            </section>}
+          </div>
+        )}
+      </div>}
+
+      {(view === 'findings' || view === 'all') && file.status === 'done' && <OcrTextPanel file={file} />}
+
+      {(view === 'metadata' || view === 'all') && <section className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4" aria-label="Metadata dan lokasi">
+        <h3 className="mb-3 font-mono text-sm font-bold text-cyan-300">METADATA &amp; LOKASI</h3>
+        <dl className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+          {([['Kamera', [file.exif?.make, file.exif?.model].filter(Boolean).join(' ')], ['Waktu menurut perangkat', file.exif?.takenAt], ['Nomor seri', file.exif?.serialNumber], ['Software', file.exif?.software], ['Ketinggian', file.exif?.altitude === undefined ? undefined : `${file.exif.altitude} m`], ['Arah bidik', file.exif?.direction === undefined ? undefined : `${file.exif.direction}°`]] as const).map(([label, value]) => <div key={label} className="border-b border-slate-800 py-2"><dt className="text-slate-400">{label}</dt><dd className="break-words text-slate-100">{value || '—'}</dd></div>)}
+        </dl>
+        {hasGPS && file.exif?.latitude !== undefined && file.exif?.longitude !== undefined && <div className="mt-3"><LeafletMap latitude={file.exif.latitude} longitude={file.exif.longitude} popupTitle={file.name} /></div>}
+        {!hasGPS && <p className="text-xs text-slate-400">Tidak ada koordinat GPS di metadata.</p>}
+      </section>}
+      {view === 'report' && <RiskReport file={file} profile={activeProfile} />}
     </div>
   );
 };

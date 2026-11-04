@@ -9,6 +9,7 @@ interface ScanOverlayProps {
   imageHeight?: number;
   hoveredFindingId?: string | null;
   onHoverFinding?: (id: string | null) => void;
+  onSelectFinding?: (id: string) => void;
 }
 
 export const ScanOverlay: React.FC<ScanOverlayProps> = ({
@@ -19,6 +20,7 @@ export const ScanOverlay: React.FC<ScanOverlayProps> = ({
   imageHeight = 0,
   hoveredFindingId = null,
   onHoverFinding,
+  onSelectFinding,
 }) => {
   const bboxFindings = findings.filter((f) => f.bbox);
 
@@ -68,13 +70,23 @@ export const ScanOverlay: React.FC<ScanOverlayProps> = ({
             key={finding.id}
             onMouseEnter={() => onHoverFinding?.(finding.id)}
             onMouseLeave={() => onHoverFinding?.(null)}
+            onClick={() => onSelectFinding?.(finding.id)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onSelectFinding?.(finding.id);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`Buka temuan ${finding.evidence}`}
             style={{
               left: `${Math.max(0, left)}%`,
               top: `${Math.max(0, top)}%`,
               width: `${Math.min(100, Math.max(3, width))}%`,
               height: `${Math.min(100, Math.max(3, height))}%`,
             }}
-            className={`absolute border-2 transition-all duration-200 cursor-pointer pointer-events-auto ${highlightClass}`}
+            className={`absolute border-2 transition-all duration-200 cursor-pointer pointer-events-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${highlightClass}`}
           >
             {/* Target Reticle corners */}
             <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-current" />

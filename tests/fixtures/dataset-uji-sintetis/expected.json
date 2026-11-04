@@ -1,0 +1,157 @@
+{
+  "catatan": "Semua data FIKTIF. Koordinat Jakarta pusat (area publik) hanya contoh. Jangan ganti dengan data nyata.",
+  "kasus": [
+    {
+      "file": "01_foto_bersih.jpg",
+      "deskripsi": "Gambar objek polos, tanpa EXIF, tanpa teks.",
+      "harapan": {
+        "skor": "0-24 (Aman)",
+        "temuan": 0
+      }
+    },
+    {
+      "file": "02_gps_saja.jpg",
+      "deskripsi": "Rumah-rumahan polos + GPS netral. Tanpa teks.",
+      "harapan": {
+        "temuan_wajib": [
+          "GPS (critical)",
+          "waktu (medium)",
+          "perangkat (low)"
+        ],
+        "skor": ">=60"
+      }
+    },
+    {
+      "file": "03_papan_satuan_nrp.jpg",
+      "deskripsi": "Papan fiktif: satuan, NRP, nomor HP + GPS.",
+      "harapan": {
+        "temuan_wajib": [
+          "satuan (high)",
+          "NRP (high)",
+          "nomor HP (medium)",
+          "GPS (critical)"
+        ],
+        "bbox": "area papan tersensor di versi aman",
+        "skor_setelah_sanitasi": "turun jauh"
+      }
+    },
+    {
+      "file": "04_dokumen_rahasia.jpg",
+      "deskripsi": "Dokumen fiktif berlabel RAHASIA + jadwal + pergerakan.",
+      "harapan": {
+        "temuan_wajib": [
+          "klasifikasi dokumen (critical)",
+          "jadwal (medium)",
+          "pergerakan (medium)"
+        ],
+        "combo": "mungkin: Pola Penugasan Terbaca bila >=3 grup"
+      }
+    },
+    {
+      "file": "05_plat_nomor_sah.jpg",
+      "deskripsi": "Plat fiktif format sah AD 1234 XY.",
+      "harapan": {
+        "temuan_wajib": [
+          "plat nomor (medium)"
+        ]
+      }
+    },
+    {
+      "file": "06_negatif_bukan_plat.jpg",
+      "deskripsi": "Teks biasa. 'SG 3 ow' TIDAK boleh terdeteksi sebagai plat.",
+      "harapan": {
+        "temuan": 0,
+        "skor": "0-24 (Aman)"
+      }
+    },
+    {
+      "file": "07_variasi_penulisan.jpg",
+      "deskripsi": "Variasi huruf kecil/tanda hubung. Harus terdeteksi sebagai satuan.",
+      "harapan": {
+        "temuan_wajib": [
+          "satuan (high) x3, kemungkinan perlu normalisasi"
+        ]
+      }
+    },
+    {
+      "file": "08_nik_fiktif.jpg",
+      "deskripsi": "NIK 16 digit fiktif.",
+      "harapan": {
+        "temuan_wajib": [
+          "NIK (high)"
+        ]
+      }
+    },
+    {
+      "file": "09_foto_besar_12mp.jpg",
+      "deskripsi": "12 MP. Uji kinerja (<15 dtk) dan skala bbox.",
+      "harapan": {
+        "kinerja": "<15 detik",
+        "bbox": "akurat pada skala asli"
+      }
+    },
+    {
+      "file": "10_bukan_gambar.jpg",
+      "deskripsi": "File teks berekstensi .jpg",
+      "harapan": {
+        "perilaku": "pesan error ramah, aplikasi tidak crash"
+      }
+    },
+    {
+      "file": "11_pola_A_11-02.jpg",
+      "deskripsi": "Foto pola hidup di titik A, 2026:11:02 05:50:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "12_pola_B_11-02.jpg",
+      "deskripsi": "Foto pola hidup di titik B, 2026:11:02 07:30:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "13_pola_A_11-03.jpg",
+      "deskripsi": "Foto pola hidup di titik A, 2026:11:03 05:55:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "14_pola_B_11-03.jpg",
+      "deskripsi": "Foto pola hidup di titik B, 2026:11:03 07:28:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "15_pola_A_11-04.jpg",
+      "deskripsi": "Foto pola hidup di titik A, 2026:11:04 05:48:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "16_pola_B_11-04.jpg",
+      "deskripsi": "Foto pola hidup di titik B, 2026:11:04 07:35:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "17_pola_C_11-04.jpg",
+      "deskripsi": "Foto pola hidup di titik C, 2026:11:04 19:10:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    },
+    {
+      "file": "18_pola_A_11-05.jpg",
+      "deskripsi": "Foto pola hidup di titik A, 2026:11:05 05:52:00.",
+      "harapan": {
+        "pola": "titik A dan B berulang tiap hari, jam sekitar 05.50 dan 07.30; titik C muncul sekali"
+      }
+    }
+  ]
+}

@@ -5,9 +5,20 @@ import kamusPergerakan from '../data/kamus-pergerakan.json';
 import kamusJadwal from '../data/kamus-jadwal.json';
 import aturanIdentitas from '../data/aturan-identitas.json';
 import klasifikasiDokumen from '../data/klasifikasi-dokumen.json';
+import kamusKonteksMiliter from '../data/kamus-konteks-militer.json';
 import type { OcrWord } from '../types';
+import type { DikEntry } from './dik';
 
 export const MIN_OCR_WORD_CONFIDENCE = 70;
+export const PUBLIC_CONTEXT_REASON = 'Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah.';
+
+export function isPublicContextFinding(finding: Finding): boolean {
+  return finding.reason === PUBLIC_CONTEXT_REASON;
+}
+
+export function isContextOnlyFindings(findings: Finding[]): boolean {
+  return findings.length > 0 && findings.every(isPublicContextFinding);
+}
 
 export interface OcrTextToken {
   text: string;
@@ -31,7 +42,7 @@ export function normalizeText(text: string): string {
  * Pure function: takes text (from caption or OCR), runs opsec detection rules,
  * and returns deterministic Finding[] array.
  */
-export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextToken[]): Finding[] {
+export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextToken[], dikEntries: DikEntry[] = []): Finding[] {
   if (!text || text.trim().length === 0) {
     return [];
   }
@@ -78,8 +89,9 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
   // Bisa berupa nama satuan langsung atau pola seperti "yonif 999", "kodim 0501"
   for (const satuan of kamusSatuan) {
     const term = satuan.toLowerCase();
+    const termPattern = term.split('').map((char) => char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[-_]?');
     // Match either standalone word or followed by optional space/numbers
-    const regex = new RegExp(`\\b${term}(?:\\s*\\d{1,4}[a-z]*)?\\b`, 'gi');
+    const regex = new RegExp(`\\b${termPattern}(?:\\s*\\d{1,4}[a-z]*)?\\b`, 'gi');
     let match;
     while ((match = regex.exec(text)) !== null) {
       const confidence = confidenceForRange(match.index, match.index + match[0].length);
@@ -98,7 +110,7 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
     }
   }
 
-  // 3. Istilah Fasilitas / Lokasi (High)
+  // 3. Istilah Fasilitas / Lokasi. Generic "perbatasan" is medium; named facilities remain high.
   for (const loc of kamusLokasi) {
     const term = loc.toLowerCase();
     const regex = new RegExp(`\\b${term}\\b`, 'gi');
@@ -110,10 +122,12 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
         id: nextId('opr-fasilitas'),
         ruleId: 'opr-fasilitas',
         category: 'lokasi',
-        severity: 'high',
+        severity: loc === 'perbatasan' ? 'medium' : loc === 'sektor' ? 'low' : 'high',
         source,
         evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
-        reason: `Istilah fasilitas atau instalasi pertahanan '${match[0]}' teridentifikasi.`,
+        reason: loc === 'perbatasan' || loc === 'sektor'
+          ? PUBLIC_CONTEXT_REASON
+          : `Istilah fasilitas atau instalasi pertahanan '${match[0]}' teridentifikasi.`,
         recommendation: 'Jangan mencantumkan nama atau jenis instalasi dinas dan pos pertahanan.',
         range: { start: match.index, end: match.index + match[0].length },
       });
@@ -132,11 +146,39 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
         id: nextId('opr-pergerakan'),
         ruleId: 'opr-pergerakan',
         category: 'operasional',
-        severity: 'medium',
+        severity: ['operasi', 'satgas', 'penugasan', 'patroli', 'pengamanan'].includes(mov) ? 'low' : 'medium',
         source,
         evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
-        reason: `Kata kunci pergerakan militer '${match[0]}' terdeteksi. Berpotensi membuka dinamika kegiatan personel.`,
+        reason: ['operasi', 'satgas', 'penugasan', 'patroli', 'pengamanan'].includes(mov)
+          ? PUBLIC_CONTEXT_REASON
+          : `Kata kunci kegiatan/pergerakan '${match[0]}' terdeteksi; periksa apakah kegiatan ini sudah diumumkan resmi.`,
         recommendation: 'Hindari membagikan status keberangkatan, rute, atau pola pergerakan pasukan.',
+        range: { start: match.index, end: match.index + match[0].length },
+      });
+    }
+  }
+
+  for (const context of kamusKonteksMiliter) {
+    const normalizedTerm = normalizeText(context.term);
+    const termPattern = normalizedTerm.split(' ').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+    const regex = new RegExp(`(?<![\\p{L}\\p{N}])${termPattern}(?![\\p{L}\\p{N}])`, 'giu');
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
+      findings.push({
+        id: nextId(context.id),
+        ruleId: context.id,
+        category: context.category as Category,
+        severity: context.severity as Severity,
+        source,
+        evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
+        reason: context.severity === 'info'
+          ? context.reason
+          : PUBLIC_CONTEXT_REASON,
+        recommendation: context.severity === 'info'
+          ? 'Hindari menambah rincian kegiatan atau lokasi yang belum layak dipublikasikan.'
+          : 'Tinjau dan samarkan rincian operasional yang belum diumumkan secara resmi.',
         range: { start: match.index, end: match.index + match[0].length },
       });
     }
@@ -212,6 +254,32 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
         evidence: source !== 'ocr' ? match[0] : `${match[0]} (keyakinan ${confidence}%)`,
         reason: rule.reason,
         recommendation: rule.recommendation,
+        range: { start: match.index, end: match.index + match[0].length },
+      });
+    }
+  }
+
+  for (const [entryIndex, entry] of dikEntries.entries()) {
+    const normalizedTerm = normalizeText(entry.term);
+    if (!normalizedTerm) continue;
+    const termPattern = normalizedTerm.split(' ').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[\\s_-]+');
+    const regex = new RegExp(`(?<![\\p{L}\\p{N}])${termPattern}(?![\\p{L}\\p{N}])`, 'giu');
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      if (!shouldAcceptOcrRange(confidence)) continue;
+      const category: Category = entry.kind === 'satuan' || entry.kind === 'kegiatan'
+        ? 'operasional' : entry.kind === 'lokasi' ? 'lokasi' : 'identitas';
+      const ruleSuffix = entryIndex + 1;
+      findings.push({
+        id: nextId(`dik-${entry.kind}-${ruleSuffix}`),
+        ruleId: `dik-${entry.kind}-${ruleSuffix}`,
+        category,
+        severity: entry.severity ?? 'high',
+        source,
+        evidence: source === 'ocr' ? `${match[0]} (keyakinan ${confidence}%)` : match[0],
+        reason: entry.catatan ? `Informasi ini tercantum dalam Daftar Informasi Kritis satuan. ${entry.catatan}` : 'Istilah ini ditandai sebagai informasi kritis oleh satuan.',
+        recommendation: 'Hapus atau samarkan istilah yang tercantum dalam Daftar Informasi Kritis sebelum membagikan konten.',
         range: { start: match.index, end: match.index + match[0].length },
       });
     }

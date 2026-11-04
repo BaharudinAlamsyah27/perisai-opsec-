@@ -1,0 +1,38 @@
+{
+  "summary": "Unggahan ini memiliki risiko {{level}} dengan skor {{score}}/100.",
+  "emptyStatus": "TIDAK ADA KEBOCORAN BERMAKNA TERDETEKSI",
+  "note": "Brief ini disusun otomatis dari temuan; bukan penilaian intelijen resmi.",
+  "groups": ["SIAPA", "DI MANA", "KAPAN", "APA", "POLA"],
+  "conclusions": {
+    "opr-satuan": { "group": "SIAPA", "template": "Teks menyebut satuan “{{evidence}}”; pihak luar dapat mengaitkan unggahan dengan satuan tersebut." },
+    "id-nrp": { "group": "SIAPA", "template": "Teks memuat nomor registrasi “{{evidence}}”; pihak luar dapat menghubungkannya dengan identitas dinas." },
+    "id-nik": { "group": "SIAPA", "template": "Teks memuat nomor identitas “{{evidence}}”; pihak luar dapat mengaitkannya dengan identitas kependudukan." },
+    "id-phone": { "group": "SIAPA", "template": "Teks memuat nomor kontak “{{evidence}}”; pihak luar dapat menghubungi nomor yang tercantum." },
+    "id-plate": { "group": "SIAPA", "template": "Teks menampilkan plat “{{evidence}}”; pihak luar dapat mengenali kendaraan yang disebut." },
+    "meta-device": { "group": "SIAPA", "template": "Metadata mencatat label perangkat “{{evidence}}”; pihak luar dapat mengetahui informasi perangkat yang tersimpan." },
+    "meta-serial": { "group": "SIAPA", "template": "Metadata mencatat nomor seri “{{evidence}}”; pihak luar dapat mengaitkan berkas yang memuat nomor tersebut." },
+    "meta-artist": { "group": "SIAPA", "template": "Metadata mencatat pembuat atau pemilik “{{evidence}}”; pihak luar dapat mengaitkan unggahan dengan nama tersebut." },
+    "meta-software": { "group": "SIAPA", "template": "Metadata mencatat perangkat lunak “{{evidence}}”; pihak luar dapat melihat label perangkat lunak yang tersimpan." },
+    "meta-gps": { "group": "DI MANA", "template": "Metadata memuat {{evidence}}; pihak luar dapat memetakan lokasi unggahan." },
+    "meta-gps-extra": { "group": "DI MANA", "template": "Metadata memuat {{evidence}}; pihak luar dapat memakai rincian ini untuk memahami konteks lokasi atau arah pengambilan." },
+    "opr-fasilitas": { "group": "DI MANA", "template": "Teks menyebut lokasi atau fasilitas “{{evidence}}”; pihak luar dapat mengaitkan unggahan dengan tempat yang disebut." },
+    "id-address": { "group": "DI MANA", "template": "Teks memuat alamat “{{evidence}}”; pihak luar dapat mengidentifikasi lokasi yang tertulis." },
+    "meta-taken-at": { "group": "KAPAN", "template": "Metadata mencatat waktu menurut perangkat “{{evidence}}” ({{weekday}}); pihak luar dapat menyusun waktu pengambilan yang tercatat." },
+    "opr-jadwal": { "group": "KAPAN", "template": "Teks memuat penanda waktu “{{evidence}}”; pihak luar dapat memperkirakan jadwal yang disebut." },
+    "opr-pergerakan": { "group": "APA", "template": "Teks memuat kegiatan atau pergerakan “{{evidence}}”; pihak luar dapat memahami aktivitas yang disebut." },
+    "opr-dokumen": { "group": "APA", "template": "Teks memuat penanda klasifikasi “{{evidence}}”; pihak luar dapat menilai unggahan berkaitan dengan dokumen berklasifikasi." },
+    "combo-pola-penugasan": { "group": "POLA", "template": "Gabungan temuan “{{evidence}}” dapat memberi pihak luar petunjuk tentang pola penugasan." }
+  },
+  "impacts": {
+    "lokasi": "Pihak luar dapat memperkirakan atau mengaitkan unggahan dengan lokasi yang terdeteksi.",
+    "identitas": "Pihak luar dapat menghubungkan unggahan dengan identitas, kontak, atau kendaraan yang terdeteksi.",
+    "operasional": "Pihak luar dapat menyusun konteks waktu, satuan, atau kegiatan dari unsur yang terdeteksi.",
+    "teknis": "Pihak luar dapat melihat informasi perangkat atau perangkat lunak yang tercatat."
+  },
+  "decisions": {
+    "Kritis": "Jangan unggah",
+    "Tinggi": "Jangan unggah",
+    "Waspada": "Unggah setelah Versi Aman",
+    "Aman": "Aman diunggah"
+  }
+}

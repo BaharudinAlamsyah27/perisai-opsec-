@@ -6,9 +6,11 @@ interface ScoreGaugeProps {
   score: number;
   level: RiskLevel;
   size?: number;
+  suppressLevelLabel?: boolean;
+  levelLabel?: string;
 }
 
-export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, level, size = 160 }) => {
+export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, level, size = 160, suppressLevelLabel = false, levelLabel }) => {
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -75,9 +77,9 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, level, size = 160
         <span className={`text-4xl font-mono font-bold tracking-tight ${theme.textColor}`}>
           {animatedScore}
         </span>
-        <span className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide border ${theme.levelBg}`}>
-          {level.toUpperCase()}
-        </span>
+        {suppressLevelLabel
+          ? <span className="mt-0.5 px-2 py-0.5 rounded border border-amber-800/70 bg-amber-950/50 text-[9px] font-semibold tracking-wide text-amber-200">CAKUPAN TERBATAS</span>
+          : <span className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide border ${levelLabel ? 'border-amber-700/70 bg-amber-950/60 text-amber-200' : theme.levelBg}`}>{levelLabel ?? level.toUpperCase()}</span>}
       </div>
     </div>
   );
