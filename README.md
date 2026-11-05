@@ -9,6 +9,8 @@
 - Analisis caption, kamus aturan OPSEC, Daftar Informasi Kritis (DIK) satuan, dan temuan kombinasi pola.
 - Skor risiko transparan, profil penilaian, brief intelijen otomatis, laporan cetak, dan versi foto aman.
 - Rekonstruksi pola hidup dari GPS dan waktu beberapa foto.
+- Deteksi kebocoran teknis (alamat IP, kontak, host, nilai akses) dan petunjuk lokasi tertulis; nilai sandi/token disamarkan pada bukti.
+- Abaikan/pulihkan temuan untuk menilai ulang skor dalam sesi, serta koreksi teks hasil OCR tanpa bbox.
 - Foto contoh fiktif untuk demonstrasi tanpa perlu menyiapkan dataset sendiri.
 
 ## Menjalankan secara lokal (3 langkah)

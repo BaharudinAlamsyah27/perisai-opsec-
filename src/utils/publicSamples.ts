@@ -21,3 +21,8 @@ export async function fetchPublicSamples(names: readonly string[]): Promise<File
   }));
   return responses.map(({ name, blob }) => new File([blob], name, { type: 'image/jpeg' }));
 }
+
+export async function fetchMissingPatternSamples(existingNames: readonly string[]): Promise<File[]> {
+  const missingNames = PATTERN_SAMPLE_NAMES.filter((name) => !existingNames.includes(name));
+  return missingNames.length > 0 ? fetchPublicSamples(missingNames) : [];
+}

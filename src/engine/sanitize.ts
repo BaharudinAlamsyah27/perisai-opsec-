@@ -59,7 +59,7 @@ export async function sanitizeImage(
 
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        reject(new Error('Cannot initialize 2D context on sanitize canvas'));
+        reject(new Error('Canvas 2D tidak dapat disiapkan untuk membuat versi aman.'));
         return;
       }
 
@@ -135,7 +135,7 @@ export async function sanitizeImage(
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            reject(new Error('Failed to create sanitized image blob'));
+            reject(new Error('Berkas gambar versi aman tidak dapat dibuat.'));
             return;
           }
           resolve({ blob, dataUrl: URL.createObjectURL(blob), width, height });
@@ -147,7 +147,7 @@ export async function sanitizeImage(
 
     img.onerror = () => {
       cleanup();
-      reject(new Error('Failed to load image for sanitization'));
+      reject(new Error('Gambar tidak dapat dimuat untuk proses sanitasi.'));
     };
   });
 }

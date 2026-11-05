@@ -50,7 +50,7 @@ export async function prepareImageForOcr(file: File, timeoutMs = DEFAULT_OCR_TIM
       canvas.height = scaledHeight;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        reject(new Error('Cannot get canvas 2d context for image downscaling'));
+        reject(new Error('Canvas 2D tidak tersedia untuk mengubah ukuran gambar.'));
         return;
       }
 
@@ -71,7 +71,7 @@ export async function prepareImageForOcr(file: File, timeoutMs = DEFAULT_OCR_TIM
       settled = true;
       window.clearTimeout(timeout);
       URL.revokeObjectURL(url);
-      reject(new Error('Failed to load image for OCR preparation'));
+      reject(new Error('Gambar tidak dapat dimuat untuk persiapan OCR.'));
     };
 
     img.src = url;
@@ -121,7 +121,7 @@ export async function runOcr(
           } else if (msg.type === 'success') {
             finish(() => resolve({ words: msg.words || [], durationMs: Date.now() - startedAt }));
           } else if (msg.type === 'error') {
-            finish(() => reject(new Error(msg.error || 'Worker OCR error')));
+            finish(() => reject(new Error(msg.error || 'Terjadi kesalahan pada pekerja OCR.')));
           }
         };
 
@@ -145,7 +145,7 @@ export async function runOcr(
         activeWorker?.terminate();
         return { words: [], error: message, durationMs: Date.now() - startedAt };
       }
-      if (/Failed to load image for OCR preparation/i.test(message)) {
+      if (/Gambar tidak dapat dimuat untuk persiapan OCR/i.test(message)) {
         activeWorker?.terminate();
         return {
           words: [],

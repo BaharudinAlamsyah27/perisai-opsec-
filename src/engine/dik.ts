@@ -22,7 +22,7 @@ export function validateDikEntries(value: unknown): DikEntry[] {
     if (typeof record.term !== 'string' || !record.term.trim()) throw new Error(`Entri ke-${index + 1}: istilah wajib diisi.`);
     if (typeof record.kind !== 'string' || !KINDS.has(record.kind as DikKind)) throw new Error(`Entri ke-${index + 1}: jenis tidak dikenal.`);
     if (record.severity !== undefined && (typeof record.severity !== 'string' || !SEVERITIES.has(record.severity as Severity))) {
-      throw new Error(`Entri ke-${index + 1}: severity tidak dikenal.`);
+      throw new Error(`Entri ke-${index + 1}: tingkat temuan tidak dikenal.`);
     }
     if (record.catatan !== undefined && typeof record.catatan !== 'string') throw new Error(`Entri ke-${index + 1}: catatan harus berupa teks.`);
     return {

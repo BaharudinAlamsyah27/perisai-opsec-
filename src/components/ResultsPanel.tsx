@@ -18,6 +18,7 @@ interface ResultsPanelProps {
   onHoverFinding?: (id: string | null) => void;
   view?: 'score' | 'findings' | 'metadata' | 'report' | 'all';
   onSelectFinding?: (id: string) => void;
+  onOpenDik?: () => void;
   findingIdPrefix?: string;
   fixedFindingsHeight?: boolean;
 }
@@ -79,10 +80,11 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   onHoverFinding,
   view = 'all',
   onSelectFinding,
+  onOpenDik,
   findingIdPrefix,
   fixedFindingsHeight = false,
 }) => {
-  const { activeProfile, setActiveProfile } = useAnalysisStore();
+  const { activeProfile, setActiveProfile, ignoreFinding, restoreFinding } = useAnalysisStore();
   const score = file.score ?? { value: 0, level: 'Aman', findings: [] };
   const style = LEVEL_STYLE[score.level] ?? LEVEL_STYLE.Aman;
   const contextOnly = isContextOnlyFindings(score.findings);
@@ -232,21 +234,26 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
               <p className="mt-2 text-[11px] text-slate-400">Kegiatan satuan terdeteksi. Periksa apakah sudah diumumkan resmi sebelum diunggah.</p>
               <p className="mt-1 text-[10px] text-slate-500">{publicContextFindings.length} kecocokan konteks digabungkan.</p>
             </article>}
-            {individualTextFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} />)}
+            {individualTextFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} onIgnore={(id) => ignoreFinding(file.id, id)} />)}
             {metadataFindings.length > 0 && <section className="space-y-2">
               <button type="button" aria-expanded={metadataOpen} onClick={() => setMetadataOpen((value) => !value)} className="w-full rounded px-2 py-2 text-left text-sm font-semibold text-cyan-200 hover:bg-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">Metadata ({metadataFindings.length})</button>
-              {metadataOpen && <div className="space-y-2">{metadataFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} />)}</div>}
+              {metadataOpen && <div className="space-y-2">{metadataFindings.map((finding) => <FindingCard key={finding.id} finding={finding} compact idPrefix={findingIdPrefix} isHovered={hoveredFindingId === finding.id} onHover={onHoverFinding} onSelect={onSelectFinding} onIgnore={(id) => ignoreFinding(file.id, id)} />)}</div>}
             </section>}
           </div>
         )}
+        {(file.ignoredFindings?.length ?? 0) > 0 && <section className="space-y-2 rounded-xl border border-slate-800 p-3" aria-label="Temuan diabaikan">
+          <h4 className="font-mono text-xs font-bold text-slate-400">Diabaikan ({file.ignoredFindings?.length ?? 0})</h4>
+          {file.ignoredFindings?.map((finding) => <FindingCard key={finding.id} finding={finding} compact ignored idPrefix={findingIdPrefix} onRestore={(id) => restoreFinding(file.id, id)} />)}
+        </section>}
       </div>}
 
       {(view === 'findings' || view === 'all') && file.status === 'done' && <OcrTextPanel file={file} />}
+      {(view === 'findings' || view === 'all') && onOpenDik && <button type="button" onClick={onOpenDik} className="inline-flex min-h-11 items-center text-left text-xs text-cyan-300 underline underline-offset-2 hover:text-cyan-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">Satuan Anda punya istilah sendiri? Atur Daftar Informasi Kritis</button>}
 
       {(view === 'metadata' || view === 'all') && <section className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4" aria-label="Metadata dan lokasi">
         <h3 className="mb-3 font-mono text-sm font-bold text-cyan-300">METADATA &amp; LOKASI</h3>
         <dl className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-          {([['Kamera', [file.exif?.make, file.exif?.model].filter(Boolean).join(' ')], ['Waktu menurut perangkat', file.exif?.takenAt], ['Nomor seri', file.exif?.serialNumber], ['Software', file.exif?.software], ['Ketinggian', file.exif?.altitude === undefined ? undefined : `${file.exif.altitude} m`], ['Arah bidik', file.exif?.direction === undefined ? undefined : `${file.exif.direction}°`]] as const).map(([label, value]) => <div key={label} className="border-b border-slate-800 py-2"><dt className="text-slate-400">{label}</dt><dd className="break-words text-slate-100">{value || '—'}</dd></div>)}
+          {([['Kamera', [file.exif?.make, file.exif?.model].filter(Boolean).join(' ')], ['Waktu menurut perangkat', file.exif?.takenAt], ['Nomor seri', file.exif?.serialNumber], ['Perangkat lunak', file.exif?.software], ['Ketinggian', file.exif?.altitude === undefined ? undefined : `${file.exif.altitude} m`], ['Arah bidik', file.exif?.direction === undefined ? undefined : `${file.exif.direction}°`]] as const).map(([label, value]) => <div key={label} className="border-b border-slate-800 py-2"><dt className="text-slate-400">{label}</dt><dd className="break-words text-slate-100">{value || '—'}</dd></div>)}
         </dl>
         {hasGPS && file.exif?.latitude !== undefined && file.exif?.longitude !== undefined && <div className="mt-3"><LeafletMap latitude={file.exif.latitude} longitude={file.exif.longitude} popupTitle={file.name} /></div>}
         {!hasGPS && <p className="text-xs text-slate-400">Tidak ada koordinat GPS di metadata.</p>}

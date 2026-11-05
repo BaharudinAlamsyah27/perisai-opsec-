@@ -25,6 +25,9 @@ describe('photo and finding interactions', () => {
   it('opens finding details with keyboard and signals hover back to the photo', () => {
     const onHover = vi.fn();
     render(<FindingCard finding={finding} compact onHover={onHover} />);
+    expect(screen.getByText('Tinggi')).toBeInTheDocument();
+    expect(screen.getByText('Operasional · Sumber: OCR')).toBeInTheDocument();
+    expect(screen.queryByText('high')).not.toBeInTheDocument();
     const card = screen.getByRole('button', { name: /YONIF 999/ });
     fireEvent.mouseEnter(card);
     expect(onHover).toHaveBeenCalledWith(finding.id);

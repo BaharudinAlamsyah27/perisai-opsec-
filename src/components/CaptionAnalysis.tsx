@@ -136,7 +136,7 @@ export const CaptionAnalysis: React.FC<CaptionAnalysisProps> = ({ className = ''
           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-3">
             <div className="text-[11px] font-mono text-slate-400 flex items-center justify-between">
               <span>PENYOROTAN KATA BERISIKO:</span>
-              <span className="text-[10px] text-cyan-400/80">INLINE OPSEC HIGHLIGHT</span>
+              <span className="text-[10px] text-cyan-400/80">SOROTAN OPSEC LANGSUNG</span>
             </div>
 
             <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800/80 min-h-[48px]">
@@ -166,7 +166,7 @@ export const CaptionAnalysis: React.FC<CaptionAnalysisProps> = ({ className = ''
           <div className="space-y-3 pt-2">
             <div className="flex items-center space-x-2 text-xs font-mono text-cyan-400">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span className="font-bold tracking-wider">SARAN PENULISAN ULANG AMAN (SAFE TEMPLATES)</span>
+              <span className="font-bold tracking-wider">SARAN PENULISAN ULANG AMAN</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

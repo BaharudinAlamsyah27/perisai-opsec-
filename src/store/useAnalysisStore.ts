@@ -3,7 +3,7 @@ import { AnalysisFile, Profile, Finding, OcrWord, AnalysisLog } from '../types';
 import { readMetadataFromFile } from '../engine/metadata';
 import { calculateScore } from '../engine/scoring';
 import { runOcr } from '../engine/ocr';
-import { analyzeText } from '../engine/rules';
+import { analyzeText, redactTechnicalSecrets } from '../engine/rules';
 import { mapOcrWordsToFindings } from '../engine/ocr-mapper';
 import { applyComboBoost } from '../engine/combos';
 import { useDikStore } from './useDikStore';
@@ -21,12 +21,47 @@ interface AnalysisState {
   clearAll: () => void;
   analyzeFile: (id: string) => Promise<void>;
   analyzeAll: () => Promise<void>;
+  ignoreFinding: (fileId: string, findingId: string, reason?: string) => void;
+  restoreFinding: (fileId: string, findingId: string) => void;
+  applyOcrCorrection: (fileId: string, text: string) => void;
+}
+
+function rebuildActiveFindings(findings: Finding[], profile: Profile): ReturnType<typeof calculateScore> {
+  const base = findings.filter((finding) => finding.source !== 'combo');
+  return calculateScore(applyComboBoost(base), profile);
 }
 
 export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   files: [],
   activeFileId: null,
   activeProfile: 'prajurit',
+
+  ignoreFinding: (fileId, findingId, reason) => set((state) => ({ files: state.files.map((file) => {
+    if (file.id !== fileId || !file.score) return file;
+    const finding = file.score.findings.find((item) => item.id === findingId);
+    if (!finding) return file;
+    const ignored = [...(file.ignoredFindings ?? []), { ...finding, ...(reason?.trim() ? { ignoredReason: reason.trim() } : {}) }];
+    const active = file.score.findings.filter((item) => item.id !== findingId && item.source !== 'combo');
+    return { ...file, ignoredFindings: ignored, score: rebuildActiveFindings(active, state.activeProfile) };
+  }) })),
+
+  restoreFinding: (fileId, findingId) => set((state) => ({ files: state.files.map((file) => {
+    if (file.id !== fileId) return file;
+    const ignored = file.ignoredFindings ?? [];
+    const finding = ignored.find((item) => item.id === findingId);
+    if (!finding) return file;
+    const restored = ignored.filter((item) => item.id !== findingId);
+    const active = [...(file.score?.findings.filter((item) => item.source !== 'combo') ?? []), finding];
+    return { ...file, ignoredFindings: restored, score: rebuildActiveFindings(active, state.activeProfile) };
+  }) })),
+
+  applyOcrCorrection: (fileId, text) => set((state) => ({ files: state.files.map((file) => {
+    if (file.id !== fileId || !file.score) return file;
+    const safeText = redactTechnicalSecrets(text);
+    const retained = file.score.findings.filter((finding) => finding.source !== 'ocr' && finding.source !== 'combo');
+    const corrected = analyzeText(safeText, 'correction', undefined, useDikStore.getState().entries);
+    return { ...file, correctedOcrText: safeText, score: rebuildActiveFindings([...retained, ...corrected], state.activeProfile) };
+  }) })),
 
   addFiles: (newFiles: File[], options = {}) => {
     const currentFiles = get().files;

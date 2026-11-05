@@ -1,8 +1,8 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir (4 Nov 2026): Audit R0 selesai; P5 dievaluasi dan dipangkas sesuai batas ukuran di spesifikasi. K-diagnosa, Q, L, M, dan N terverifikasi; K, P1–P4, dan O sebagian. `npm test` 32 file/111 tes lulus, lint dan build lulus (chunk utama 572.17 kB). Berikutnya: tuntaskan QA manual O2/O3.**
+**Posisi terakhir (5 Nov 2026): Checkpoint T diimplementasikan sebagian-terverifikasi: aturan teknis/lokasi tersirat, penyamaran bukti rahasia, ignore/restore sesi, koreksi OCR tanpa bbox, transparansi Brief/Laporan, serta pembaruan T5 tersedia. `npm test` lulus (37 file/130 tes), lint bersih, build sukses (JS utama 589.01 kB; peringatan chunk >500 kB). Fixture yang dijanjikan PO (`tests/fixtures/dataset-tambahan/19_screenshot_teknis.png` dan `caption-uji.json`) tidak ada di workspace, sehingga OCR screenshot dan seluruh kasus caption PO belum dapat diverifikasi. Perubahan lama S6–S8 dan hasil T berbagi working tree; tidak ada commit terpisah agar tidak mencampur perubahan lama.**
 
-**Terakhir diperbarui:** 4 Nov 2026 oleh Codex · **Fase:** Sprint 2 (P0)
+**Terakhir diperbarui:** 5 Nov 2026 oleh Codex · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
 
 ## 1. Dasbor Ringkas
@@ -61,6 +61,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-034 | README + ZIP | AG | ⬜ | | |
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
+| T | Kebocoran teknis, lokasi tersirat, kontrol pengguna | Codex | 🔄 | belum | T1-T3/T5 implementasi; T4 sebagian karena fixture tambahan PO belum tersedia |
 
 **Checkpoint J:** J1 selesai/commit PO dd21e8b. Perubahan J2–J6 terdahulu masih berada di working tree untuk commit manual PO.
 
@@ -73,6 +74,8 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 **Checkpoint N:** T-027 DIK satuan selesai. Kamus tambahan dicocokkan secara case-insensitive dengan normalisasi spasi/tanda hubung dan batas kata, dipakai oleh OCR/caption/analisis ulang, diberi kategori dan severity, memengaruhi scoring dan combo, serta ditandai sumbernya pada kartu. Editor mendukung tambah/ubah/hapus, impor/ekspor JSON, contoh fiktif, hapus semua, dan penyimpanan localStorage yang opt-in dengan peringatan.
 
 **Checkpoint O:** O1 menyertakan 5 foto demo dan 8 foto pola sintetis (797,177 byte total) dengan label fiktif serta tombol muat contoh. O4 membuat 27 dependency/license records dari `package.json` dan `node_modules`, deklarasi AI, dan keterangan contoh fiktif. O5 README memuat fitur, setup 3 langkah, arsitektur, privasi, batasan, kredit, serta panduan deploy. O6 memeriksa konfigurasi Netlify/Vercel dan menambahkan security headers untuk Vite preview. O2 test otomatis lulus; hasil QA dirangkum di log sesi berikut. O3 source audit tidak menemukan upload foto/caption; uji browser Network/offline dan respons CSP belum dapat diamati.
+
+**Checkpoint T:** T1 aturan teknis (IPv4, email, host internal, sandi/token berlabel, SSH), masking secret, combo infrastruktur dan pemetaan bbox OCR telah dibuat. T2 tautan peta, koordinat desimal/DMS tervalidasi, petunjuk lokasi, serta frasa real-time + lokasi ditangani. T3 tombol Abaikan/Pulihkan menghitung ulang skor dan combo di memori sesi; panel OCR mendukung koreksi yang diberi sumber `Teks koreksi` tanpa bbox; Brief dan Laporan mencantumkan jumlah yang diabaikan. T5 label Pola Hidup, PRD, README, Tentang diperbarui. T4 unit sintetis untuk rules, masking, bbox, Brief/Laporan dan ignore/restore tersedia, tetapi dataset PO di `tests/fixtures/dataset-tambahan/` tidak ditemukan; OCR screenshot 19, skenario `caption-uji.json`, dan regresi dataset 01–18 belum diverifikasi penuh.
 
 ### Audit R0 — 4 Nov 2026
 
@@ -90,10 +93,52 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 
 Audit gate R0: `git log --oneline -15` menunjukkan Q committed pada `2d35ebc`; `npm test` 32 file/111 tes lulus; `npm run lint` lulus; `npm run build` lulus dengan peringatan chunk utama 572.17 kB (>500 kB). Worktree hanya memiliki `docs/07_CHECKPOINT_LANJUTAN.md` untracked (spesifikasi PO), tidak ada perubahan kode lokal yang tertinggal. Tidak ada upaya push.
 
-**Berikutnya:** O adalah checkpoint selanjutnya pada antrean setelah P5 dipangkas. Selesaikan O2/O3 dengan verifikasi browser produksi; ukuran layar 1920/1366/1024/768/390 px masih belum diuji visual.
+**Berikutnya:** PO meninjau S8 pada lebar 360/390/430/768/1024/1366/1920 px memakai daftar cek di bawah. Setelah itu, S7 latar dapat dirancang ulang sesuai arahan PO. O2/O3 QA browser produksi dan checkpoint O tetap belum selesai.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
+### 5 Nov 2026 — Codex — Checkpoint T
+- T1 — Menambahkan `aturan-teknis.json` dan aturan deterministik OCR/caption: validasi IP/rentang privat, email instansi, host internal, secret berlabel, SSH; secret ditampilkan sebagai 2 karakter awal + empat bullet. `combo-groups.json` dan `combos.ts` menghasilkan temuan kritis “Gambaran Infrastruktur Terbaca” dari dua jenis kebocoran. Bbox rahasia OCR dipetakan berdasarkan range agar tetap dapat disensor Versi Aman.
+- T2 — Menambahkan deteksi link peta, koordinat desimal dengan batas lat/lon, koordinat DMS dengan batas derajat/menit/detik, petunjuk check-in/lokasi, dan frasa real-time yang berdekatan dengan lokasi tetap.
+- T3 — Kartu temuan memiliki Abaikan; bagian Diabaikan (N) menyediakan Pulihkan. Skor aktif dan combo dibangun ulang setelah perubahan. Panel OCR bisa menerapkan koreksi yang disimpan selama sesi; sumber “Teks koreksi” tanpa bbox. Brief dan Laporan menampilkan jumlah yang diabaikan pengguna.
+- T5 — Badge halaman Pola Hidup menjadi “Fitur lanjutan”; PRD, README, dan Tentang menyebut cakupan.
+- Verifikasi akhir: `npm test` 37 file/130 tes lulus; lint bersih; build sukses. Uji targeted sesudah pemolesan aturan 3 file/10 tes lulus. JS utama 589.01 kB (peringatan Vite >500 kB), CSS 60.41 kB. `git diff --check` bersih.
+- Blocker T4 — `tests/fixtures/dataset-tambahan/` tidak ditemukan saat dicek. Tidak ada file uji PO yang dibuat/ditiru; tes OCR `19_screenshot_teknis.png` dan expected dari `caption-uji.json` menunggu PO menaruh fixture.
+
+### 5 Nov 2026 — Codex — S8 penyelarasan tombol Menu
+- Mengelompokkan badge status dan tombol Menu ke sisi kanan header (`ml-auto`) agar flex `justify-between` tidak menempatkan tombol Menu di tengah pada layar lebar. Pada layar kecil, badge tetap tersembunyi sehingga tombol berada di tepi kanan.
+- Test Header 4/4 lulus; `npm run lint` dan `npm run build` lulus. Build: JS utama 579.02 kB, CSS 60.17 kB; peringatan Vite >500 kB tetap ada. Test tidak menjalankan browser visual; PO dapat meninjau melalui daftar cek S8 di atas.
+
+### 4 Nov 2026 — Codex — S8 Header dan tampilan mobile
+- S8-1 — Mengganti navigasi lima item menjadi tautan logo ke Analisis dan satu tombol Menu. Menu menampilkan Pola Hidup, Daftar Kritis, Privasi, Tentang; mobile berupa panel selebar viewport dan desktop berupa popover. Ditambah `aria-expanded`/`aria-controls`, penutupan Escape/klik luar, pemulihan fokus, navigasi tombol panah/Home/End, target sentuh 44 px, serta tautan footer Privasi/Tentang. Badge tanpa unggah hanya muncul mulai 1280 px; tagline mulai 640 px dan COMMAND CENTER mulai 1024 px.
+- S8-2 — Banner privasi diringkas menjadi satu kalimat dan tombol Detail. Detail membuka keterangan lengkap serta chip Pekerja web, Siap tanpa internet, dan Peta atas izin.
+- S8-3 — Padding halaman mobile diringkas; bar sesi menumpuk di bawah 640 px, unggah compact tidak memakai kotak putus-putus, nama berkas dipotong, tab foto menggulir di wadahnya. Dasbor hasil 1 kolom (<768), 2 kolom (768–1023), 3 kolom (>=1024); panel gauge/radar menumpuk saat ruang tidak cukup.
+- S8-4 — Halaman Analisis menampilkan ringkasan berbasis `analyzePatterns()` hanya jika ada minimal 3 observasi dengan GPS dan waktu valid; tombol menuju Pola Hidup. Hero memiliki “Skenario contoh: seminggu unggahan” yang memuat 8 foto sintetis tanpa OCR dan membuka Pola Hidup. Ditambah pintasan ke Daftar Informasi Kritis.
+- S8-5 — Test menu (status aria, empat tautan, Escape, klik luar, navigasi keyboard/fokus), banner, pola dengan metadata valid/tidak valid, pemuatan skenario, pintasan DIK, dan pembaruan test smoke. Hasil: `npm test` 35 file/121 tes lulus; lint/build final lulus. Bundle sesudah S8: JS utama 578.99 kB dan CSS 60.14 kB; dibanding build prototipe tepat sebelum S8 +4.02 kB JS dan +0.07 kB CSS. Peringatan Vite chunk >500 kB tetap ada.
+- Tindak lanjut S7 — Setelah PO menilai tampilan krem memburuk, prototipe krem dan lapisan S7 dikeluarkan dari aplikasi. Latar S7 tidak dianggap selesai dan ditunda untuk rancangan ulang; engine/skor/aturan tidak diubah pada S8.
+- Cek visual untuk PO (browser lokal tidak tersedia bagi Codex): 360/390/430 px — logo satu baris, banner dan Menu tidak meluber, panel pola/unggah tidak membuat geser horizontal, bar sesi vertikal, radar menumpuk, aksi aman mudah dijangkau. 768 px — dua kolom dan panel tab mengisi lebar. 1024 px — tiga panel dan popover Menu. 1366/1920 px — tagline/badge muncul sesuai breakpoint, menu menjadi popover, footer tidak bertumpuk. Semua ukuran — buka/tutup menu dengan klik, Escape, klik luar dan keyboard; Detail privasi; skenario contoh; kartu Pola Hidup; tautan DIK/footer.
+- Commit S8 belum dicoba pada sesi ini karena working tree masih memuat perubahan S6 dan komponen lama yang belum dikomit; perlu pemisahan agar commit S8 tidak mencampur pekerjaan terdahulu.
+
+### 4 Nov 2026 — Codex — Prototipe tema terang “peta kertas”
+- Menanggapi masukan PO bahwa tampilan terlalu hitam, mengubah kanvas aplikasi dari slate gelap ke krem pucat (`#f4f1e8`) sambil mempertahankan panel HUD/header gelap, aksen cyan, dan globe. Tujuannya membuat kartu lebih menonjol tanpa membalik warna teks/kontrol seluruh aplikasi.
+- Menurunkan intensitas grid/titik, menghangatkan vignette, dan melembutkan cahaya sudut; warna risiko tetap mengalir dari pemetaan skor yang sama. Footer disesuaikan agar kontras pada kanvas terang; latar tetap disembunyikan pada print dan tidak ada aset/dependency/network/CSP baru.
+- Verifikasi otomatis: `npm test` 34 file/116 tes lulus; `npm run lint` lulus; `npm run build` lulus. CSS produksi 60.07 kB dibanding 59.78 kB sebelum prototipe (+0.29 kB); JS 574.97 kB (sebelumnya 574.99 kB). Build masih memberi peringatan chunk >500 kB. Test mengeluarkan warning React `act(...)` dan jsdom canvas/globe yang sudah ada, tetapi suite lulus.
+- Pemeriksaan browser/screenshot tidak dilakukan karena akses browser lokal dinonaktifkan pada pengaturan Work di sesi ini; responsivitas visual akhir perlu ditinjau saat preview dibuka lokal.
+- Koreksi 4 Nov: PO menilai prototipe krem memburuk. Perubahan krem dibatalkan pada sesi S8; catatan ini bersifat historis, bukan tampilan aplikasi saat ini.
+
+### 4 Nov 2026 — Codex — S6 Konsistensi bahasa dan polesan
+- Menambahkan `getSeverityLabel()` sebagai satu pemetaan bersama untuk Kritis/Tinggi/Sedang/Rendah/Info dan memakai di Aksi Cepat, kartu temuan, brief, laporan cetak, serta editor DIK. Menyatukan label sumber/kategori untuk kartu temuan agar nilai internal `ocr`, `metadata`, dan lain-lain tidak tampil mentah.
+- Melokalkan string antarmuka yang masih mencolok: indeks gauge, panel log dan badge sumber, caption, privasi/peta, editor metadata, kredit/tentang, serta pesan teknis OCR/sanitasi. Ukuran/spacing label “INDEKS RISIKO” disesuaikan agar muat di gauge kecil dan tidak menempel ke tepi.
+- Test baru memeriksa pemetaan severity/sumber dan label kartu/Aksi Cepat. Hasil akhir: `npm test` 33 file, 113/113 lulus; `npm run lint` lulus; `npm run build` lulus (JS utama 572.73 kB; peringatan Vite >500 kB); `git diff --check` bersih. Test awal sempat gagal karena assertion mengharapkan satu label “Tinggi” padahal dua temuan tampil; assertion diperbaiki dan seluruh suite akhir lulus.
+- Blocker commit S6: `git add` ditolak saat membuat `.git/index.lock` (`Permission denied`). Tidak dicoba menghindarinya; perubahan menunggu commit manual PO.
+
+### 4 Nov 2026 — Codex — S7 Latar “Peta Operasi”
+- Menambahkan `TacticalBackground` sebagai lapisan `fixed`, `pointer-events: none`, di bawah konten. Kontur topografi berupa SVG inline; grid dan titik koordinat serta cahaya sudut/vignette berupa CSS lokal. Tidak memakai aset eksternal/dependency baru, filter blur, atau animasi; hanya warna cahaya yang transisi 600 ms. `prefers-reduced-motion` meniadakan transisi.
+- Warna cahaya diambil dari palet `getScoreTheme()` yang sama dengan gauge: netral cyan saat belum ada skor, lalu hijau/kuning/oranye/merah berdasarkan skor aktif. Root `isolate` menempatkan dekorasi di bawah konten; inset viewport dan SVG `preserveAspectRatio` menjaga latar mengikuti lebar layar tanpa membuat elemen melebar. Print CSS menyembunyikan latar; panel laporan tetap putih.
+- Ukuran build sebelum (S6): JS utama 572.73 kB, CSS 58.72 kB. Sesudah S7: JS utama 574.99 kB (**+2.26 kB**), CSS 59.78 kB (**+1.06 kB**); gzip sesudah: JS 180.87 kB, CSS 14.79 kB. Tidak ada perubahan CSP atau request jaringan.
+- Verifikasi: test 34 file, 116/116 lulus, termasuk pemetaan warna dan render lapisan; lint lulus; build lulus dengan peringatan Vite untuk JS utama >500 kB. `git diff --check` bersih. Pemeriksaan mobile 390 px dilakukan dari geometri CSS (lapisan memakai `inset: 0`, lebar SVG 100%, tanpa transform/blur); belum ada screenshot browser manual.
+- Blocker commit S7: `git add` ditolak saat membuat `.git/index.lock` (`Permission denied`). Tidak dicoba menghindarinya; perubahan menunggu commit manual PO.
+
 ### 4 Nov 2026 — Codex — Audit R0 dan evaluasi P5
 - Audit R0 — Menjalankan `git log --oneline -15`, `npm test` (32 file, 111/111), `npm run lint`, dan `npm run build` (sukses; chunk utama 572.17 kB, peringatan Vite >500 kB). Bukti per checkpoint dan kekurangan dicatat pada tabel Audit R0 di atas.
 - P5 — Memeriksa package dan model resmi MediaPipe. Tasks Vision memakai Apache-2.0; paket memerlukan WASM 14,603,354 byte dan loader 334,128 byte. Model BlazeFace short-range resmi berukuran 229,746 byte, sehingga jumlah aset lokal wajib sekitar 15.17 MB sebelum integrasi JS. Sesuai hard stop P5 (>15 MB tambahan), checkpoint dipangkas. Dependency tidak dipertahankan; tidak ada file model/WASM ditambahkan.
@@ -432,6 +477,8 @@ Format:
 - —
 
 ## 7. Blocker Aktif
+- 5 Nov 2026 — Fixture Checkpoint T yang dijanjikan PO belum tersedia di `tests/fixtures/dataset-tambahan/`; OCR screenshot teknis dan test berbasis `caption-uji.json` belum bisa dijalankan. Tidak ada fixture foto pihak lain yang ditambahkan.
+- 5 Nov 2026 — Commit T belum dicoba karena working tree masih mencampur perubahan S6–S8 lama dengan file integrasi yang kini disentuh T; staging per-file berisiko memasukkan perubahan lama ke commit checkpoint. PO dapat meninjau dan commit perubahan manual setelah fixture masuk.
 - 4 Nov 2026 — Commit J2, T-023, T-024, dan T-027 gagal karena izin sistem menolak akses `.git/index.lock`. O2/O3 manual browser QA juga belum lengkap: Computer Use berhenti setelah Escape fisik pengguna, dan localhost ditolak sandbox shell. Perubahan J–O tetap di working tree; tidak dilakukan bypass. Push dilakukan PO.
 - 4 Nov 2026 — Percobaan commit O1 gagal karena izin sistem menolak pembuatan `.git/index.lock` (`Permission denied`). O1–O6 menunggu commit manual PO; tidak dilakukan bypass.
 - 4 Nov 2026 — Verifikasi ulang T-027 lulus. Commit N belum bisa dipisahkan aman dari perubahan J–O yang masih bercampur pada file integrasi; commit manual PO diperlukan setelah pemisahan/peninjauan staging.

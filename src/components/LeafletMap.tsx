@@ -96,9 +96,9 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
           <div className="flex items-start space-x-2 bg-amber-900/30 border border-amber-500/40 rounded-lg px-3 py-2.5 text-xs text-amber-200 max-w-sm">
             <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
-              Jika peta ditampilkan, browser memuat gambar tile dari server{' '}
+              Jika peta ditampilkan, browser memuat gambar peta dari server{' '}
               <strong>OpenStreetMap</strong>. Server tersebut akan mengetahui{' '}
-              <strong>area kasar lokasi</strong> foto berdasarkan tile yang diminta,
+              <strong>area kasar lokasi</strong> foto berdasarkan bagian peta yang diminta,
               meski tidak menerima foto Anda.
             </span>
           </div>

@@ -2,7 +2,7 @@ export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 
 export type Category = 'lokasi' | 'identitas' | 'operasional' | 'teknis';
 
-export type Source = 'metadata' | 'ocr' | 'caption' | 'combo';
+export type Source = 'metadata' | 'ocr' | 'caption' | 'correction' | 'combo';
 
 export interface BoundingBox {
   x0: number;
@@ -22,6 +22,7 @@ export interface Finding {
   recommendation: string;
   bbox?: BoundingBox;
   range?: { start: number; end: number };
+  ignoredReason?: string;
 }
 
 export type RiskLevel = 'Aman' | 'Waspada' | 'Tinggi' | 'Kritis';
@@ -76,6 +77,8 @@ export interface AnalysisFile {
   ocrProgress?: number;
   logs?: AnalysisLog[];
   score?: Score;
+  ignoredFindings?: Finding[];
+  correctedOcrText?: string;
   status: 'idle' | 'analyzing' | 'done' | 'error';
   errorMessage?: string;
 }

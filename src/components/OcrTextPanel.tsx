@@ -2,13 +2,20 @@ import React from 'react';
 import type { AnalysisFile } from '../types';
 import { MIN_OCR_WORD_CONFIDENCE } from '../engine/rules';
 import { Eye, Timer } from 'lucide-react';
+import { useState } from 'react';
+import { redactTechnicalSecrets } from '../engine/rules';
+import { useAnalysisStore } from '../store/useAnalysisStore';
 
 interface OcrTextPanelProps {
   file: AnalysisFile;
 }
 
 export const OcrTextPanel: React.FC<OcrTextPanelProps> = ({ file }) => {
+  const applyOcrCorrection = useAnalysisStore((state) => state.applyOcrCorrection);
+  const [draft, setDraft] = useState<string | null>(null);
   const words = file.ocrWords ?? [];
+  const safeWords = redactTechnicalSecrets(words.map((word) => word.text).join(' ')).split(/\s+/);
+  const originalText = redactTechnicalSecrets(words.map((word) => word.text).join(' '));
   const readable = words.filter((word) => word.conf >= MIN_OCR_WORD_CONFIDENCE).length;
   const ignored = words.length - readable;
   if (file.ocrStatus === 'skipped' || file.status === 'idle' || file.status === 'analyzing') return null;
@@ -25,10 +32,16 @@ export const OcrTextPanel: React.FC<OcrTextPanelProps> = ({ file }) => {
         return <React.Fragment key={`${word.text}-${index}`}>
           {index > 0 && ' '}
           <span className={ignoredWord ? 'text-slate-600' : 'text-slate-100'} title={`Keyakinan ${Math.round(word.conf)}%`}>
-            {word.text}<span className="ml-1 text-[10px] text-slate-500">{Math.round(word.conf)}%</span>{ignoredWord && <span className="ml-1 text-[9px] text-amber-500">diabaikan</span>}
+            {safeWords[index] ?? word.text}<span className="ml-1 text-[10px] text-slate-500">{Math.round(word.conf)}%</span>{ignoredWord && <span className="ml-1 text-[9px] text-amber-500">diabaikan</span>}
           </span>
         </React.Fragment>;
       })}
     </p> : <p className="mt-3 text-xs text-slate-400">{file.ocrStatus === 'error' ? 'OCR gagal karena error teknis.' : 'OCR berhasil tetapi tidak ada teks yang dikenali.'}</p>}
+    {words.length > 0 && <div className="mt-3 space-y-2">
+      <label htmlFor={`ocr-correction-${file.id}`} className="block text-xs text-slate-400">Edit teks OCR (hanya sesi ini)</label>
+      <textarea id={`ocr-correction-${file.id}`} rows={3} value={draft ?? file.correctedOcrText ?? originalText} onChange={(event) => setDraft(event.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-sm text-slate-100" />
+      <button type="button" onClick={() => { applyOcrCorrection(file.id, redactTechnicalSecrets(draft ?? file.correctedOcrText ?? originalText)); setDraft(null); }} className="min-h-11 rounded-lg border border-cyan-700 px-3 text-xs font-semibold text-cyan-200 hover:bg-cyan-950">Terapkan koreksi</button>
+      {file.correctedOcrText !== undefined && <p className="text-[11px] text-cyan-300">Temuan hasil koreksi tidak memiliki bbox dan tidak disensor otomatis.</p>}
+    </div>}
   </section>;
 };

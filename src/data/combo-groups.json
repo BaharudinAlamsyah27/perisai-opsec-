@@ -16,6 +16,12 @@
   "id-phone": "identitas",
   "id-plate": "identitas",
   "id-address": "lokasi",
-  "id-nametag": "identitas"
+  "id-nametag": "identitas",
+  "technical-ipv4": "infrastruktur-ip",
+  "technical-email": "infrastruktur-email",
+  "technical-internal-host": "infrastruktur-host",
+  "technical-password": "infrastruktur-password",
+  "technical-token": "infrastruktur-token",
+  "technical-ssh": "infrastruktur-ssh"
 }
 

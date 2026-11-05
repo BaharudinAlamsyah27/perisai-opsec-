@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, Image as ImageIcon, AlertCircle, FlaskConical } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, AlertCircle, FlaskConical, Route } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { getQuickFileFingerprint, sameQuickFileFingerprint } from '../utils/quickFileFingerprint';
 import { DEMO_SAMPLE_NAMES, fetchPublicSamples } from '../utils/publicSamples';
@@ -7,7 +7,7 @@ import { DEMO_SAMPLE_NAMES, fetchPublicSamples } from '../utils/publicSamples';
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+export const UploadZone: React.FC<{ compact?: boolean; onLoadPatternExamples?: () => Promise<void> }> = ({ compact = false, onLoadPatternExamples }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -92,6 +92,19 @@ export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false })
     }
   };
 
+  const loadPatternExamples = async () => {
+    if (!onLoadPatternExamples) return;
+    setLoadingSamples(true);
+    setErrorMessage(null);
+    try {
+      await onLoadPatternExamples();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Skenario contoh pola hidup tidak dapat dimuat.');
+    } finally {
+      setLoadingSamples(false);
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -119,7 +132,7 @@ export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false })
   };
 
   return (
-    <div className="w-full">
+    <div className={compact ? 'w-auto min-w-0 shrink-0' : 'w-full min-w-0'}>
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -134,7 +147,7 @@ export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false })
         role="button"
         tabIndex={0}
         aria-label={compact ? 'Tambah foto' : 'Pilih foto untuk dianalisis'}
-        className={`relative border-2 border-dashed text-center cursor-pointer transition-all duration-300 overflow-hidden ${compact ? 'rounded-lg px-3 py-2' : 'rounded-2xl p-8 sm:p-12'} ${
+        className={`relative text-center cursor-pointer transition-all duration-300 overflow-hidden ${compact ? 'flex min-h-11 items-center rounded-lg border border-cyan-800/70 bg-cyan-950/30 px-3 py-2 hover:border-cyan-500' : 'border-2 border-dashed rounded-2xl p-5 sm:p-12'} ${
           isDragging
             ? 'border-cyan-400 bg-cyan-950/30 scale-[1.005] shadow-[0_0_25px_rgba(6,182,212,0.25)]'
             : 'border-slate-800 hover:border-cyan-500/50 bg-slate-950/60 hover:bg-slate-900/50'
@@ -155,7 +168,7 @@ export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false })
           className="hidden"
         />
 
-        <div className={compact ? 'flex items-center justify-center gap-2' : 'flex flex-col items-center justify-center space-y-3'}>
+        <div className={compact ? 'flex min-w-0 items-center justify-center gap-2' : 'flex flex-col items-center justify-center space-y-3'}>
           <div className={`bg-cyan-950/40 text-cyan-400 rounded-xl border border-cyan-500/30 shadow-inner ${compact ? 'p-1.5' : 'p-4'}`}>
             <UploadCloud className={compact ? 'h-4 w-4' : 'w-8 h-8'} />
           </div>
@@ -175,7 +188,8 @@ export const UploadZone: React.FC<{ compact?: boolean }> = ({ compact = false })
       </div>
 
       {!compact && <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-        <button type="button" onClick={() => void loadExamples()} disabled={loadingSamples} className="inline-flex items-center gap-2 rounded-xl border border-amber-600/60 bg-amber-950/40 px-4 py-2 text-xs font-bold text-amber-100 hover:bg-amber-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60"><FlaskConical className="h-4 w-4" />{loadingSamples ? 'Memuat contoh…' : 'Coba foto contoh'}</button>
+        <button type="button" onClick={() => void loadExamples()} disabled={loadingSamples} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-amber-600/60 bg-amber-950/40 px-4 py-2 text-xs font-bold text-amber-100 hover:bg-amber-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60"><FlaskConical className="h-4 w-4" />{loadingSamples ? 'Memuat contoh…' : 'Coba foto contoh'}</button>
+        {onLoadPatternExamples && <button type="button" onClick={() => void loadPatternExamples()} disabled={loadingSamples} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-cyan-700/70 px-3 py-2 text-xs font-semibold text-cyan-200 hover:bg-cyan-950/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60"><Route className="h-4 w-4 shrink-0" /><span>Skenario contoh: seminggu unggahan</span></button>}
         <span className="rounded-full border border-slate-700 px-2.5 py-1 text-[10px] font-mono font-bold tracking-wide text-emerald-200">DATA CONTOH FIKTIF</span>
       </div>}
 

@@ -23,14 +23,14 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ findings, className = '' }
   const polygonPoints = `${ptLokasi} ${ptIdentitas} ${ptOperasional} ${ptTeknis}`;
 
   return (
-    <div className={`flex flex-col items-center justify-center p-3 bg-slate-950/70 border border-slate-800 rounded-xl relative ${className}`}>
+    <div className={`relative flex min-w-0 flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-950/70 p-3 ${className}`}>
       {/* HUD Header */}
       <div className="w-full flex items-center justify-between pb-1 mb-1 border-b border-slate-800/80">
         <span className="text-[10px] font-mono tracking-wider text-cyan-400">VEKTOR ANCAMAN OPSEC</span>
-        <span className="text-[9px] font-mono text-slate-500">4-AXIS</span>
+        <span className="text-[9px] font-mono text-slate-500">4 SUMBU</span>
       </div>
 
-      <svg viewBox="0 0 200 200" className="w-44 h-44 overflow-visible">
+      <svg viewBox="0 0 200 200" className="h-auto w-full max-w-44 overflow-visible">
         {/* Background Grid Circles */}
         {[0.33, 0.66, 1].map((step, idx) => (
           <circle

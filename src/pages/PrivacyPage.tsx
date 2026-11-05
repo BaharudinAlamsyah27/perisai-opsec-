@@ -44,8 +44,8 @@ export const PrivacyPage: React.FC = () => {
             <li className="flex items-start space-x-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Tanpa Pelacakan &amp; Analytics:</strong> Tidak ada skrip analitik
-                pihak ketiga (Google Analytics, dsb). Semua aset (termasuk model OCR) di-bundle
+                <strong>Tanpa Pelacakan &amp; Analitik:</strong> Tidak ada skrip analitik
+                pihak ketiga (Google Analytics, dsb). Semua aset (termasuk model OCR) disertakan
                 lokal.
               </span>
             </li>
@@ -56,14 +56,14 @@ export const PrivacyPage: React.FC = () => {
         <div className="bg-amber-900/20 border border-amber-500/40 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
             <AlertTriangle className="w-5 h-5 text-amber-400" />
-            <span>Pengecualian: Peta (Opt-In)</span>
+            <span>Pengecualian: Peta (Atas Persetujuan)</span>
           </h2>
           <p className="text-sm text-slate-300 leading-relaxed">
-            Fitur peta interaktif bersifat <strong className="text-amber-300">opt-in</strong>.
+            Fitur peta interaktif hanya aktif setelah <strong className="text-amber-300">Anda menyetujuinya</strong>.
             Secara default, aplikasi hanya menampilkan teks koordinat GPS tanpa memuat peta.
             Jika Anda menekan tombol &ldquo;Tampilkan Peta&rdquo;, browser akan memuat gambar
-            <em> tile</em> dari server <strong>OpenStreetMap</strong>. Permintaan tile tersebut
-            mengandung informasi koordinat tile (zoom level dan posisi grid), sehingga server
+            <em> gambar peta</em> dari server <strong>OpenStreetMap</strong>. Permintaan peta tersebut
+            mengandung informasi koordinat peta (tingkat pembesaran dan posisi kisi), sehingga server
             OpenStreetMap dapat mengetahui <strong>area kasar lokasi</strong> foto Anda.
             Data foto Anda tetap tidak pernah dikirim. Jika privasi penuh diperlukan, jangan
             aktifkan peta.
@@ -91,16 +91,16 @@ export const PrivacyPage: React.FC = () => {
               </kbd>
               ).
             </li>
-            <li>Pilih tab Network dan centang opsi Preserve log.</li>
+            <li>Pilih tab Jaringan (Network) dan centang opsi Simpan log (Preserve log).</li>
             <li>Unggah foto dan lakukan analisis di PERISAI OPSEC.</li>
             <li>
-              Amati daftar request: <strong>nol permintaan</strong> berisi payload foto/teks ke
+              Amati daftar permintaan jaringan: <strong>nol permintaan</strong> berisi payload foto/teks ke
               server mana pun.
             </li>
             <li>
-              Jika peta tidak diaktifkan: <strong>nol request ke tile.openstreetmap.org</strong>.
+              Jika peta tidak diaktifkan: <strong>tidak ada permintaan ke server peta OpenStreetMap</strong>.
             </li>
-            <li>Matikan WiFi/Internet: analisis tetap berjalan offline.</li>
+            <li>Matikan Wi-Fi/internet: analisis tetap berjalan tanpa koneksi.</li>
           </ol>
         </div>
       </div>

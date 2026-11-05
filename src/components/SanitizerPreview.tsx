@@ -273,7 +273,7 @@ export const SanitizerPreview: React.FC<SanitizerPreviewProps> = ({ file, classN
           {isProcessing ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>MEMPROSES RE-ENCODE...</span>
+              <span>MEMPROSES PENGODEAN ULANG...</span>
             </>
           ) : (
             <>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Printer } from 'lucide-react';
 import type { AnalysisFile, Profile } from '../types';
 import { BriefIntel } from './BriefIntel';
+import { getFindingCategoryLabel, getSeverityLabel } from '../utils/uiLabels';
 
 const PROFILE_NAMES: Record<Profile, string> = {
   prajurit: 'Prajurit',
@@ -48,7 +49,7 @@ export const RiskReport: React.FC<RiskReportProps> = ({ file, profile }) => {
           <ol className="space-y-3">
             {score.findings.map((finding, index) => (
               <li key={finding.id} id={`risk-finding-${finding.id}`} className="break-inside-avoid rounded-lg border border-slate-700 p-3">
-                <h5 className="font-semibold">{index + 1}. {finding.category} · {finding.severity}</h5>
+                <h5 className="font-semibold">{index + 1}. {getFindingCategoryLabel(finding.category)} · {getSeverityLabel(finding.severity)}</h5>
                 <p className="mt-1 text-sm"><strong>Bukti:</strong> {finding.evidence}</p>
                 <p className="mt-1 text-sm"><strong>Alasan:</strong> {finding.reason}</p>
                 <p className="mt-1 text-sm"><strong>Rekomendasi:</strong> {finding.recommendation}</p>
@@ -57,6 +58,8 @@ export const RiskReport: React.FC<RiskReportProps> = ({ file, profile }) => {
           </ol>
         )}
       </section>
+
+      <p className="mt-3 text-sm font-semibold">{file.ignoredFindings?.length ?? 0} temuan diabaikan pengguna</p>
 
       <section className="mt-5 break-before-page" aria-label="Brief Intelijen Lawan">
         <BriefIntel file={file} />

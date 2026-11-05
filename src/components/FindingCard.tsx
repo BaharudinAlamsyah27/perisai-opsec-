@@ -1,6 +1,7 @@
 import React from 'react';
-import { Finding, Severity } from '../types';
+import { Finding } from '../types';
 import { AlertTriangle, AlertCircle, Info, ShieldAlert, CheckCircle, Crosshair, ChevronDown } from 'lucide-react';
+import { getFindingCategoryLabel, getFindingSourceLabel, getSeverityLabel } from '../utils/uiLabels';
 
 interface FindingCardProps {
   finding: Finding;
@@ -9,38 +10,33 @@ interface FindingCardProps {
   onSelect?: (id: string) => void;
   compact?: boolean;
   idPrefix?: string;
+  onIgnore?: (id: string) => void;
+  onRestore?: (id: string) => void;
+  ignored?: boolean;
 }
 
-const SEVERITY_CONFIG: Record<
-  Severity,
-  { label: string; badgeClass: string; borderClass: string; icon: React.ReactNode }
-> = {
+const SEVERITY_CONFIG = {
   critical: {
-    label: 'Kritis',
     badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
     borderClass: 'border-rose-900/60 hover:border-rose-600/80 bg-rose-950/20',
     icon: <ShieldAlert className="w-4 h-4 text-rose-400" />,
   },
   high: {
-    label: 'Tinggi',
     badgeClass: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
     borderClass: 'border-orange-900/60 hover:border-orange-600/80 bg-orange-950/20',
     icon: <AlertTriangle className="w-4 h-4 text-orange-400" />,
   },
   medium: {
-    label: 'Sedang',
     badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     borderClass: 'border-amber-900/60 hover:border-amber-600/80 bg-amber-950/20',
     icon: <AlertCircle className="w-4 h-4 text-amber-400" />,
   },
   low: {
-    label: 'Rendah',
     badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
     borderClass: 'border-sky-900/60 hover:border-sky-600/80 bg-sky-950/20',
     icon: <Info className="w-4 h-4 text-sky-400" />,
   },
   info: {
-    label: 'Info',
     badgeClass: 'bg-slate-700 text-slate-300 border-slate-600',
     borderClass: 'border-slate-800 hover:border-slate-700 bg-slate-900/40',
     icon: <Info className="w-4 h-4 text-slate-400" />,
@@ -54,9 +50,12 @@ export const FindingCard: React.FC<FindingCardProps> = ({
   onSelect,
   compact = false,
   idPrefix = '',
+  onIgnore,
+  onRestore,
+  ignored = false,
 }) => {
   const [expanded, setExpanded] = React.useState(false);
-  const config = SEVERITY_CONFIG[finding.severity] ?? SEVERITY_CONFIG.info;
+  const config = SEVERITY_CONFIG[finding.severity];
   const hasBbox = Boolean(finding.bbox);
 
   return (
@@ -78,7 +77,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
       tabIndex={0}
       role="button"
       aria-expanded={compact ? expanded : undefined}
-      className={`border rounded-xl p-4 transition-all duration-200 cursor-default ${
+      className={`border rounded-xl p-4 transition-all duration-200 cursor-default ${ignored ? 'opacity-50' : ''} ${
         isHovered
           ? 'border-cyan-400 bg-cyan-950/30 shadow-[0_0_15px_rgba(6,182,212,0.25)] scale-[1.008]'
           : config.borderClass
@@ -90,10 +89,10 @@ export const FindingCard: React.FC<FindingCardProps> = ({
           <span
             className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${config.badgeClass}`}
           >
-            {config.label}
+            {getSeverityLabel(finding.severity)}
           </span>
           <span className="text-xs text-slate-400 uppercase font-mono tracking-wider">
-            [{finding.category}] • {finding.source}
+            {getFindingCategoryLabel(finding.category)} · Sumber: {getFindingSourceLabel(finding.source)}
           </span>
           {finding.ruleId.startsWith('dik-') && <span className="rounded border border-fuchsia-700/60 bg-fuchsia-950/40 px-2 py-0.5 text-[9px] font-mono font-bold tracking-wide text-fuchsia-200">Dari Daftar Informasi Kritis</span>}
         </div>
@@ -108,6 +107,9 @@ export const FindingCard: React.FC<FindingCardProps> = ({
         {compact && <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />}
         </div>
       </div>
+
+      {onIgnore && !ignored && <button type="button" onClick={(event) => { event.stopPropagation(); onIgnore(finding.id); }} className="mt-2 min-h-11 rounded border border-slate-700 px-3 text-xs text-slate-300 hover:border-amber-600 hover:text-amber-200">Abaikan temuan</button>}
+      {onRestore && ignored && <button type="button" onClick={(event) => { event.stopPropagation(); onRestore(finding.id); }} className="mt-2 min-h-11 rounded border border-cyan-700 px-3 text-xs text-cyan-200">Pulihkan</button>}
 
       {/* Evidence */}
       <div className="mb-2 px-1 py-1 font-mono text-xs text-cyan-300 break-words flex items-center justify-between">

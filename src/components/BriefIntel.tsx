@@ -1,15 +1,12 @@
 import React from 'react';
 import { createIntelBrief, type BriefStatement } from '../engine/brief';
 import type { AnalysisFile } from '../types';
+import { getSeverityLabel } from '../utils/uiLabels';
 
 interface BriefIntelProps {
   file: AnalysisFile;
   onSelectFinding?: (findingId: string) => void;
 }
-
-const SEVERITY_LABEL: Record<string, string> = {
-  critical: 'Kritis', high: 'Tinggi', medium: 'Sedang', low: 'Rendah', info: 'Info',
-};
 
 export const BriefIntel: React.FC<BriefIntelProps> = ({ file, onSelectFinding }) => {
   const score = file.score ?? { value: 0, level: 'Aman' as const, findings: [] };
@@ -68,7 +65,7 @@ export const BriefIntel: React.FC<BriefIntelProps> = ({ file, onSelectFinding })
 
       <section aria-labelledby="brief-mitigations-title">
         <h4 id="brief-mitigations-title" className="text-xs font-bold uppercase tracking-wider text-slate-400">4 · Langkah penanggulangan</h4>
-        {brief.mitigations.length > 0 && <ol className="mt-2 space-y-2">{brief.mitigations.map((item, index) => renderStatement(item, `mitigation-${index}`, SEVERITY_LABEL[item.severity]))}</ol>}
+        {brief.mitigations.length > 0 && <ol className="mt-2 space-y-2">{brief.mitigations.map((item, index) => renderStatement(item, `mitigation-${index}`, getSeverityLabel(item.severity)))}</ol>}
       </section>
 
       <section aria-labelledby="brief-decision-title" className="rounded-lg border border-emerald-800/70 bg-emerald-950/30 p-3">
@@ -79,6 +76,7 @@ export const BriefIntel: React.FC<BriefIntelProps> = ({ file, onSelectFinding })
       </section>
 
       <p className="border-t border-slate-800 pt-3 text-[11px] text-slate-400">{brief.note}</p>
+      <p className="text-[11px] font-semibold text-amber-200">{file.ignoredFindings?.length ?? 0} temuan diabaikan pengguna</p>
     </article>
   );
 };

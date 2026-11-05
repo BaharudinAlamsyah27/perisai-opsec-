@@ -1,0 +1,12 @@
+[
+  { "id": "technical-ipv4", "type": "ipv4", "severityPrivate": "high", "severityPublic": "medium", "category": "teknis" },
+  { "id": "technical-email", "type": "email", "severityInstitution": "high", "severityOther": "medium", "category": "identitas" },
+  { "id": "technical-internal-host", "type": "internal-host", "severity": "high", "category": "teknis" },
+  { "id": "technical-password", "type": "password", "severity": "critical", "category": "teknis", "secret": true },
+  { "id": "technical-token", "type": "token", "severity": "critical", "category": "teknis", "secret": true },
+  { "id": "technical-ssh", "type": "ssh", "severity": "medium", "category": "teknis" },
+  { "id": "location-map-link", "type": "map-link", "severity": "high", "category": "lokasi" },
+  { "id": "location-coordinate-decimal", "type": "decimal-coordinate", "severity": "high", "category": "lokasi" },
+  { "id": "location-coordinate-dms", "type": "dms-coordinate", "severity": "high", "category": "lokasi" },
+  { "id": "location-hint", "type": "location-hint", "severity": "medium", "category": "lokasi" }
+]

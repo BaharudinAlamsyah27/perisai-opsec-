@@ -3,7 +3,7 @@ import { Activity, Clock3, MapPin, Radar, ShieldAlert, Timer, Waypoints } from '
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { analyzePatterns, formatPatternTime, renderPatternInsight, type PatternAnalysisResult } from '../engine/pattern';
 import { LeafletMap } from '../components/LeafletMap';
-import { PATTERN_SAMPLE_NAMES, fetchPublicSamples } from '../utils/publicSamples';
+import { fetchMissingPatternSamples } from '../utils/publicSamples';
 
 const CLUSTER_COLORS = ['#34d399', '#22d3ee', '#fbbf24', '#fb7185', '#a78bfa', '#60a5fa', '#f472b6'];
 const WEEKDAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -157,12 +157,11 @@ export const PatternPage: React.FC = () => {
     setLoadingPatternSamples(true);
     setStatusMessage(null);
     try {
-      const missingNames = PATTERN_SAMPLE_NAMES.filter((name) => !files.some((file) => file.name === name));
-      if (missingNames.length === 0) {
+      const samples = await fetchMissingPatternSamples(files.map((file) => file.name));
+      if (samples.length === 0) {
         setStatusMessage('Foto contoh pola hidup sudah ada di sesi. Jalankan analisis pola untuk melihat hasilnya.');
         return;
       }
-      const samples = await fetchPublicSamples(missingNames);
       addFiles(samples, { metadataOnly: true });
       setResult(null);
       setLabels({});
@@ -192,7 +191,7 @@ export const PatternPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-white">Rekonstruksi Pola Hidup</h1>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-300">Beberapa foto yang masing-masing tampak aman dapat menunjukkan lokasi yang berulang, jam kunjungan, dan urutan perpindahan ketika dilihat sebagai satu kumpulan.</p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 font-mono text-[10px] font-bold tracking-wide text-amber-200"><ShieldAlert className="h-4 w-4" /> FITUR P1</span>
+        <span className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 font-mono text-[10px] font-bold tracking-wide text-amber-200"><ShieldAlert className="h-4 w-4" /> Fitur lanjutan</span>
       </div>
       <div className="mt-4 grid gap-3 border-t border-slate-800 pt-4 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
@@ -209,7 +208,7 @@ export const PatternPage: React.FC = () => {
         </button>
         <button type="button" onClick={() => void loadPatternSamples()} disabled={loadingPatternSamples} className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-700/60 bg-amber-950/40 px-4 py-3 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60">{loadingPatternSamples ? 'Memuat contoh…' : 'Muat contoh pola hidup'}</button>
       </div>
-      <p className="mt-3 text-[11px] text-slate-500">Foto tanpa koordinat GPS atau waktu pengambilan yang valid tidak dipetakan. Sebaran di bawah bersifat relatif dan tidak memuat tile peta.</p>
+      <p className="mt-3 text-[11px] text-slate-500">Foto tanpa koordinat GPS atau waktu pengambilan yang valid tidak dipetakan. Sebaran di bawah bersifat relatif dan tidak memuat peta jalan.</p>
       <p className="mt-2 text-[10px] font-mono font-bold tracking-wide text-emerald-300">DATA CONTOH FIKTIF · tersedia untuk demonstrasi</p>
     </header>
 
@@ -283,7 +282,7 @@ export const PatternPage: React.FC = () => {
 
       {mapCluster && <details className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
         <summary className="cursor-pointer font-mono text-xs font-bold text-cyan-200">PETA OSM OPSIONAL · PERLU PERSETUJUAN</summary>
-        <p className="my-3 text-xs text-amber-200">Memuat peta akan meminta tile ke OpenStreetMap dan mengungkap area kasar lokasi yang dipilih. Sebaran dan analisis di atas tetap berjalan tanpa peta.</p>
+        <p className="my-3 text-xs text-amber-200">Memuat peta akan meminta gambar peta dari OpenStreetMap dan mengungkap area kasar lokasi yang dipilih. Sebaran dan analisis di atas tetap berjalan tanpa peta.</p>
         <label htmlFor="pattern-map-cluster" className="mb-2 block text-xs text-slate-300">Pilih titik untuk peta</label>
         <select id="pattern-map-cluster" value={mapCluster.id} onChange={(event) => setMapClusterId(event.target.value)} className="mb-3 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">
           {result.clusters.map((cluster) => <option key={cluster.id} value={cluster.id}>{labels[cluster.id] ?? cluster.label}</option>)}

@@ -34,6 +34,7 @@ Prajurit, keluarga, dan satuan aktif di media sosial. Satu foto dapat membocorka
 | F-08 | Laporan risiko | Halaman ringkasan + ekspor cetak/PDF (via print CSS) |
 | F-09 | Bukti privasi | Halaman "Privasi" + banner "diproses di perangkat Anda"; CSP ketat |
 | F-10 | Hosting publik + halaman Tentang/Kredit lisensi | Link dapat diakses juri tanpa login |
+| F-21 | Deteksi kebocoran teknis dan lokasi tersirat pada OCR/caption; penyamaran nilai akses; abaikan/pulihkan temuan dan koreksi teks OCR dalam sesi | Aturan deterministik dan bukti rahasia disamarkan; perubahan pengguna hanya di memori sesi |
 
 ### P1 — Pembeda (kerjakan setelah semua P0 hijau)
 | ID | Fitur | Nilai |

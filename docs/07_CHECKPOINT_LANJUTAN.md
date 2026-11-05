@@ -75,3 +75,36 @@ O3. Verifikasi privasi di build produksi (build + preview): Network tanpa reques
 O4. Halaman Tentang/Kredit: daftar dependency + lisensi (skrip scripts/licenses.mjs tanpa dependency baru -> src/data/licenses.json), deklarasi penggunaan AI coding assistant, pernyataan data contoh fiktif.
 O5. README lengkap: ringkasan, fitur, cara menjalankan 3 langkah, arsitektur singkat, privasi, batasan jujur (OCR tidak sempurna, HEIC belum didukung, isi visual tidak dinilai), kredit.
 O6. netlify.toml/vercel.json siap deploy; langkah deploy ditulis di README.
+
+## Checkpoint T — Kebocoran teknis, lokasi tersirat, kontrol pengguna
+
+T1 KEBOCORAN TEKNIS (OCR + caption), aturan di `src/data/aturan-teknis.json`, logika di `rules.ts`:
+- IPv4 valid (oktet 0-255): privat (10/8, 172.16/12, 192.168/16) severity high; publik medium; abaikan 0.0.0.0 dan 127.x. Kategori teknis.
+- Email: domain instansi (.mil.id, .go.id) high; lainnya medium. Kategori identitas.
+- URL/host internal (.local, .internal, intranet, localhost, host:port): high. Teknis.
+- Sandi berlabel (password|passwd|pwd|pass|kata sandi|sandi + : atau =): critical. Teknis.
+- Token/kunci berlabel (api_key|token|secret|bearer + : atau = + >=8 karakter): critical. Teknis.
+- Pola "ssh user@host": medium. Teknis.
+- Combo baru: >=2 jenis kebocoran teknis berbeda -> temuan sintetis "Gambaran Infrastruktur Terbaca" severity critical (grup `infrastruktur` di `combo-groups.json`).
+- PENYAMARAN BUKTI: nilai sandi/token/kunci tidak boleh tampil utuh di UI, log, Brief, atau Laporan cetak; tampilkan 2 karakter awal + "••••". Uji Brief dan Laporan agar tidak memuat nilai rahasia asli fixture.
+- Versi Aman otomatis menyensor bbox temuan teknis dan identitas dari OCR.
+
+T2 LOKASI TERSIRAT (caption dan OCR):
+- Tautan peta (maps.app.goo.gl, goo.gl/maps, google.com/maps, maps.google, waze.com/ul, openstreetmap.org, bing.com/maps): high.
+- Koordinat teks desimal (lat -90..90, lon -180..180, minimal 4 desimal) dan DMS: high.
+- Emoji 📍, "check-in", "lokasi:", "posisi", "titik kumpul", "share loc": medium.
+- Frasa waktu nyata ("lagi di", "sekarang di", "live") + lokasi tetap sesuai aturan lama.
+
+T3 KONTROL PENGGUNA:
+- Tombol "Abaikan temuan" pada kartu (alasan opsional): temuan keluar dari skor, tampil redup di bagian "Diabaikan (N)" dengan tombol "Pulihkan"; hanya memori sesi.
+- Brief dan Laporan wajib menyebut "N temuan diabaikan pengguna" demi transparansi. Skor, radar, gauge dihitung ulang.
+- "Edit teks OCR": area teks bisa diedit pada panel Teks terbaca; "Terapkan koreksi" menjalankan ulang aturan pada teks hasil edit. Temuan koreksi tidak memiliki bbox dan diberi label "dari teks koreksi".
+
+T4 TEST:
+- `caption-uji.json` menggerakkan test unit (tiap id memuat kategori harapan; c10-c12 nol temuan).
+- OCR untuk `19_screenshot_teknis.png`: minimal 4 dari 5 jenis (IP, email, sandi, token, URL) terdeteksi.
+- Test abaikan/pulihkan mengubah skor. Dataset 01-18 tidak berubah hasilnya.
+
+T5 UI kecil: ganti lencana "FITUR P1" di halaman Pola Hidup menjadi "Fitur lanjutan". Perbarui PRD, README, dan Tentang.
+
+Selesai: test, lint, build lulus; update PROGRESS (Posisi terakhir, Berikutnya); laporkan ringkas dan sebutkan yang belum.

@@ -11,6 +11,21 @@ const comboGroups: Record<string, string> = comboGroupsData;
 export function applyComboBoost(findings: Finding[]): Finding[] {
   if (!findings || findings.length === 0) return [];
 
+  const technicalGroups = new Set(findings
+    .filter((finding) => finding.source !== 'combo')
+    .map((finding) => comboGroups[finding.ruleId])
+    .filter((group): group is string => Boolean(group?.startsWith('infrastruktur-'))));
+  const infrastructureCombo: Finding[] = technicalGroups.size >= 2 ? [{
+    id: 'combo-infrastruktur',
+    ruleId: 'combo-infrastruktur',
+    category: 'teknis',
+    severity: 'critical',
+    source: 'combo',
+    evidence: 'Gambaran Infrastruktur Terbaca',
+    reason: 'Gambaran Infrastruktur Terbaca: beberapa jenis informasi teknis dapat membantu pihak luar memahami lingkungan sistem.',
+    recommendation: 'Hapus atau samarkan informasi teknis sebelum membagikan konten.',
+  }] : [];
+
   // Define the critical operational combo groups from PRD §7
   const TARGET_OPERATIONAL_GROUPS = new Set(['satuan', 'lokasi', 'jadwal', 'pergerakan']);
 
@@ -43,8 +58,8 @@ export function applyComboBoost(findings: Finding[]): Finding[] {
         'Segera pisahkan atau batalkan unggahan konten ini. Informasi gabungan ini memberikan gambaran operasi yang utuh kepada musuh/pihak luar.',
     };
 
-    return [syntheticFinding, ...findings];
+    return [...infrastructureCombo, syntheticFinding, ...findings];
   }
 
-  return findings;
+  return [...infrastructureCombo, ...findings];
 }

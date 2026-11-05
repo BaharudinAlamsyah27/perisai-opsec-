@@ -72,8 +72,8 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, level, size = 160
       </svg>
 
       {/* Center Label HUD */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-[10px] font-mono tracking-widest text-slate-400">INDEX RISIKO</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+        <span className="w-full whitespace-nowrap text-[9px] font-mono tracking-[0.12em] leading-tight text-slate-400">INDEKS RISIKO</span>
         <span className={`text-4xl font-mono font-bold tracking-tight ${theme.textColor}`}>
           {animatedScore}
         </span>

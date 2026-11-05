@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RiskReport } from '../../src/components/RiskReport';
 import type { AnalysisFile, Finding } from '../../src/types';
+import { analyzeText } from '../../src/engine/rules';
+import { calculateScore } from '../../src/engine/scoring';
 
 const finding: Finding = {
   id: 'report-finding',
@@ -43,5 +45,14 @@ describe('RiskReport', () => {
     expect(document.getElementById('risk-finding-report-finding')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cetak / Simpan PDF' }));
     expect(print).toHaveBeenCalledOnce();
+  });
+
+  it('does not render an original synthetic password or token in the report or brief', () => {
+    const findings = analyzeText('password: BiruUji91 token: HijauContoh82', 'caption');
+    const secretFile: AnalysisFile = { ...file, score: calculateScore(findings), ignoredFindings: [finding] };
+    const { container } = render(<RiskReport file={secretFile} profile="prajurit" />);
+    expect(container.textContent).not.toContain('BiruUji91');
+    expect(container.textContent).not.toContain('HijauContoh82');
+    expect(container.textContent).toContain('1 temuan diabaikan pengguna');
   });
 });

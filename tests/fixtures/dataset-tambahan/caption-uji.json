@@ -1,0 +1,89 @@
+{
+  "catatan": "Semua FIKTIF. Alamat IP memakai rentang privat/dokumentasi; token sengaja BUKAN format kunci penyedia mana pun agar tidak memicu pemindai rahasia GitHub.",
+  "caption": [
+    {
+      "id": "c01",
+      "teks": "Lagi di sini guys 📍 Pos Jaga Bukit Contoh",
+      "harapan": [
+        "pin lokasi/check-in",
+        "lokasi + waktu nyata (real-time)"
+      ]
+    },
+    {
+      "id": "c02",
+      "teks": "Lokasi kami: https://maps.app.goo.gl/abcDEF123",
+      "harapan": [
+        "tautan peta"
+      ]
+    },
+    {
+      "id": "c03",
+      "teks": "Titik kumpul https://www.google.com/maps?q=-6.1754,106.8272",
+      "harapan": [
+        "tautan peta",
+        "koordinat desimal"
+      ]
+    },
+    {
+      "id": "c04",
+      "teks": "Koordinat kami -6.1754, 106.8272 ya",
+      "harapan": [
+        "koordinat desimal"
+      ]
+    },
+    {
+      "id": "c05",
+      "teks": "Posisi 6°10'31\"S 106°49'38\"E",
+      "harapan": [
+        "koordinat DMS"
+      ]
+    },
+    {
+      "id": "c06",
+      "teks": "Check-in di Asrama Contoh Blok C",
+      "harapan": [
+        "check-in",
+        "fasilitas (asrama)"
+      ]
+    },
+    {
+      "id": "c07",
+      "teks": "Sekarang lagi patroli di sektor utara bersama regu",
+      "harapan": [
+        "real-time",
+        "pergerakan/kegiatan"
+      ]
+    },
+    {
+      "id": "c08",
+      "teks": "ssh operator@10.20.30.40 pass: Contoh-Sandi-Fiktif-2026",
+      "harapan": [
+        "IP privat",
+        "email/akun",
+        "kata sandi berlabel"
+      ]
+    },
+    {
+      "id": "c09",
+      "teks": "server publik 203.0.113.7 sudah naik",
+      "harapan": [
+        "alamat IP"
+      ]
+    },
+    {
+      "id": "c10",
+      "teks": "Selamat pagi semuanya, semangat hari ini!",
+      "harapan": []
+    },
+    {
+      "id": "c11",
+      "teks": "Dirgahayu TNI, bersatu berjuang kita pasti menang",
+      "harapan": []
+    },
+    {
+      "id": "c12",
+      "teks": "Kopi pagi ini enak banget",
+      "harapan": []
+    }
+  ]
+}

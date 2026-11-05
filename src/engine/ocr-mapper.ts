@@ -18,6 +18,21 @@ export function mapOcrWordsToFindings(
     // If finding already has a bounding box, keep it
     if (finding.bbox) return finding;
 
+    if (finding.range) {
+      let cursor = 0;
+      const matched: BoundingBox[] = [];
+      for (const word of words) {
+        const start = cursor;
+        const end = start + word.text.length;
+        cursor = end + 1;
+        if (word.conf >= MIN_OCR_WORD_CONFIDENCE && start < finding.range.end && end > finding.range.start) matched.push(word.bbox);
+      }
+      if (matched.length > 0) return { ...finding, bbox: {
+        x0: Math.min(...matched.map((box) => box.x0)), y0: Math.min(...matched.map((box) => box.y0)),
+        x1: Math.max(...matched.map((box) => box.x1)), y1: Math.max(...matched.map((box) => box.y1)),
+      } };
+    }
+
     const evidenceWords = finding.evidence
       .trim()
       .replace(/\s+\(keyakinan \d+%\)$/, '')

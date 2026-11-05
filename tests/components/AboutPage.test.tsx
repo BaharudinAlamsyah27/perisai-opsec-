@@ -9,6 +9,9 @@ describe('AboutPage', () => {
     expect(pageText).toContain('Daftar dependency dari package.json');
     expect(pageText).toContain('react v18.3.1');
     expect(pageText).toContain('Deklarasi AI');
+    expect(pageText).toContain('Pemeriksaan Metadata Foto');
+    expect(pageText).toContain('Sumber Terbuka');
+    expect(pageText).not.toContain('AI coding assistant');
     expect(pageText).toContain('semua foto contoh di aplikasi dibuat secara sintetis');
   });
 });

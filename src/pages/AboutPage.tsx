@@ -38,7 +38,7 @@ export const AboutPage: React.FC = () => {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-300">
             <div className="p-3 bg-slate-900/60 rounded-lg border border-slate-800">
-              <strong className="text-emerald-400 block mb-1">1. Metadata Forensik</strong>
+              <strong className="text-emerald-400 block mb-1">1. Pemeriksaan Metadata Foto</strong>
               Membaca EXIF foto: koordinat GPS presisi, tanggal & jam pengambilan, model kamera, dan nomor seri perangkat.
             </div>
             <div className="p-3 bg-slate-900/60 rounded-lg border border-slate-800">
@@ -53,14 +53,18 @@ export const AboutPage: React.FC = () => {
               <strong className="text-emerald-400 block mb-1">4. Skor Noisy-OR Transparan</strong>
               Perhitungan probabilitas risiko matematis yang dapat dijelaskan secara transparan tanpa model black-box AI.
             </div>
+            <div className="p-3 bg-slate-900/60 rounded-lg border border-slate-800">
+              <strong className="text-emerald-400 block mb-1">5. Kebocoran teknis dan kontrol pengguna</strong>
+              Mendeteksi kredensial, host, alamat, dan petunjuk lokasi dari teks. Bukti akses disamarkan; temuan dapat diabaikan/dipulihkan dan teks OCR dikoreksi hanya selama sesi.
+            </div>
           </div>
         </div>
 
-        {/* Open Source Credits & AI Declaration */}
+        {/* Kredit komponen dan deklarasi AI */}
         <div className="bg-slate-800/60 border border-slate-700/80 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
             <Code2 className="w-5 h-5 text-sky-400" />
-            <span>Kredit Komponen Open Source & Deklarasi AI</span>
+            <span>Kredit Komponen Sumber Terbuka & Deklarasi AI</span>
           </h2>
           <p className="text-xs text-slate-400 mb-3">Daftar dependency dari package.json dan lisensi yang ditemukan di node_modules. Jalankan <code>npm run licenses</code> setelah dependency berubah.</p>
           <ul className="grid gap-1 text-xs text-slate-300 font-mono sm:grid-cols-2">
@@ -69,7 +73,7 @@ export const AboutPage: React.FC = () => {
           <p className="mt-3 text-xs text-slate-400">Aset dan layanan terkait:</p>
           <ul className="text-xs text-slate-300 space-y-1 font-mono">{licenses.bundledAssets.map((asset) => <li key={asset.name}>• {asset.name} — {asset.license}; {asset.source}</li>)}</ul>
           <div className="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400">
-            <strong>Deklarasi AI:</strong> Proyek ini dirancang dan dikembangkan dengan bantuan AI coding assistant (Antigravity & Codex) selama periode resmi kompetisi. Seluruh aturan keamanan dan kode sumber diverifikasi serta diuji secara ketat.
+            <strong>Deklarasi AI:</strong> Proyek ini dirancang dan dikembangkan dengan bantuan asisten pemrograman AI (Antigravity &amp; Codex) selama periode resmi kompetisi. Seluruh aturan keamanan dan kode sumber diverifikasi serta diuji secara ketat.
           </div>
           <div className="mt-3 text-xs text-slate-400"><strong>Data contoh:</strong> semua foto contoh di aplikasi dibuat secara sintetis. Nama, tulisan, dan metadata pada contoh bersifat fiktif.</div>
         </div>
