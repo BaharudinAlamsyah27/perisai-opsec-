@@ -53,7 +53,6 @@ describe('OCR engine helper functions', () => {
     vi.stubGlobal('URL', MockURL);
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ drawImage: vi.fn() } as unknown as CanvasRenderingContext2D);
     vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/jpeg;base64,dGVzdA==');
-
     const result = await runOcr(new File(['valid'], 'valid.jpg', { type: 'image/jpeg' }), undefined, 10);
     expect(result.error).toContain('Waktu OCR habis');
     expect(terminate).toHaveBeenCalledOnce();

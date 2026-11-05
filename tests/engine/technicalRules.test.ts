@@ -65,4 +65,22 @@ describe('technical and implicit location rules', () => {
     expect(finding?.evidence).not.toContain('BiruContoh71');
     expect(mapOcrWordsToFindings(words, finding ? [finding] : [])[0]?.bbox).toEqual({ x0: 62, y0: 2, x1: 130, y1: 20 });
   });
+
+  it('tolerates OCR variants in strict technical patterns without weakening ordinary keyword rules', () => {
+    const ipToken = buildOcrTextTokens([{ text: '10.20.30.4O', conf: 55, bbox: { x0: 0, y0: 0, x1: 100, y1: 20 } }]);
+    const ipFinding = analyzeText(ipToken.text, 'ocr', ipToken.tokens).find((finding) => finding.ruleId === 'technical-ipv4');
+    expect(ipFinding?.evidence).toContain('10.20.30.40');
+    expect(ipFinding?.evidence).toContain('keyakinan OCR rendah 55%');
+
+    const secrets = analyzeText('API TOKEN = DEMO-BUKAN-KUNCI-12345678; DB-PASSWORD: Contoh-Sandi-Fiktif-2026', 'caption');
+    expect(secrets.some((finding) => finding.ruleId === 'technical-token')).toBe(true);
+    expect(secrets.some((finding) => finding.ruleId === 'technical-password')).toBe(true);
+    expect(secrets.every((finding) => finding.evidence.includes('••••'))).toBe(true);
+
+    const weakKeyword = buildOcrTextTokens([{ text: 'YONIF', conf: 55, bbox: { x0: 0, y0: 0, x1: 60, y1: 20 } }]);
+    expect(analyzeText(weakKeyword.text, 'ocr', weakKeyword.tokens).some((finding) => finding.ruleId === 'opr-satuan')).toBe(false);
+    const tooWeakIp = buildOcrTextTokens([{ text: '10.20.30.4O', conf: 44, bbox: { x0: 0, y0: 0, x1: 100, y1: 20 } }]);
+    expect(analyzeText(tooWeakIp.text, 'ocr', tooWeakIp.tokens).some((finding) => finding.ruleId === 'technical-ipv4')).toBe(false);
+    expect(analyzeText('Selamat pagi, semangat!', 'caption')).toHaveLength(0);
+  });
 });

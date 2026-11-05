@@ -3,6 +3,7 @@ import type { PSM as PSMType } from 'tesseract.js';
 import type { BoundingBox, OcrWord } from '../types';
 import { mapTesseractBlocksToWords } from './ocrWords';
 import { mergeUniqueOcrWords, OCR_PASS_NAMES } from './ocrMerge';
+import { binarizeOtsu, preprocessOcrImage, upscaleForSmallText, type RgbaImageData } from './ocrPreprocess';
 
 export interface OcrProgressMessage {
   type: 'progress';
@@ -56,33 +57,40 @@ function imageDataUrlToBlob(dataUrl: string): Blob {
   return new Blob([bytes], { type: mimeType });
 }
 
-async function makeContrastVariant(source: ImageBitmap, inverted: boolean): Promise<ImageBitmap> {
+async function makeEnhancedVariant(source: ImageBitmap, otsu = false): Promise<{ blob: Blob; width: number; height: number; inverted: boolean; upscaled: boolean; averageLuminance: number }> {
   const canvas = new OffscreenCanvas(source.width, source.height);
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) throw new Error('Canvas OCR tidak tersedia di worker.');
   context.drawImage(source, 0, 0);
   const pixels = context.getImageData(0, 0, source.width, source.height);
-  for (let index = 0; index < pixels.data.length; index += 4) {
-    const luminance = 0.299 * pixels.data[index] + 0.587 * pixels.data[index + 1] + 0.114 * pixels.data[index + 2];
-    const contrasted = Math.max(0, Math.min(255, (luminance - 128) * 1.5 + 128));
-    const value = Math.round(inverted ? 255 - contrasted : contrasted);
-    pixels.data[index] = value;
-    pixels.data[index + 1] = value;
-    pixels.data[index + 2] = value;
-  }
-  context.putImageData(pixels, 0, 0);
-  return createImageBitmap(await canvas.convertToBlob({ type: 'image/png' }));
+  const processed = preprocessOcrImage(pixels as RgbaImageData);
+  const enlarged = upscaleForSmallText(processed.image);
+  const selected = otsu ? binarizeOtsu(enlarged) : enlarged;
+  const output = new OffscreenCanvas(selected.width, selected.height);
+  const outputContext = output.getContext('2d', { willReadFrequently: true });
+  if (!outputContext) throw new Error('Canvas OCR tidak tersedia saat menyimpan hasil praproses.');
+  const safePixels = new Uint8ClampedArray(selected.data.length);
+  safePixels.set(selected.data);
+  const result = new ImageData(safePixels, selected.width, selected.height);
+  outputContext.putImageData(result, 0, 0);
+  return {
+    blob: await output.convertToBlob({ type: 'image/png' }),
+    width: selected.width,
+    height: selected.height,
+    inverted: processed.inverted,
+    upscaled: selected.width !== source.width || selected.height !== source.height,
+    averageLuminance: processed.averageLuminance,
+  };
 }
 
 // Handler inside Web Worker. The caller terminates this worker after 20 seconds at most.
 self.onmessage = async (event: MessageEvent<OcrWorkerRequest>) => {
   const startedAt = Date.now();
-  const { imageBitmap, imageDataUrl, originalWidth, originalHeight, scaledWidth, scaledHeight } = event.data;
+  const { imageBitmap, imageDataUrl, originalWidth, originalHeight } = event.data;
   let worker: Awaited<ReturnType<typeof createWorker>> | undefined;
   let sourceBitmap: ImageBitmap | undefined;
-  const variants: ImageBitmap[] = [];
   let activePassIndex = 0;
-  let totalPasses = 3;
+  let totalPasses: number = OCR_PASS_NAMES.length;
   try {
     const tessdataPath = new URL(`${import.meta.env.BASE_URL}tessdata/`, self.location.origin).href;
     worker = await createWorker(['ind', 'eng'], 1, {
@@ -101,46 +109,63 @@ self.onmessage = async (event: MessageEvent<OcrWorkerRequest>) => {
 
     sourceBitmap = imageBitmap ?? (imageDataUrl ? await createImageBitmap(imageDataUrlToBlob(imageDataUrl)) : undefined);
     if (!sourceBitmap) throw new Error('Tidak ada gambar yang dapat dibaca oleh OCR.');
-    let enhanced: ImageBitmap | undefined;
-    let inverted: ImageBitmap | undefined;
+    let enhanced: Awaited<ReturnType<typeof makeEnhancedVariant>> | undefined;
+    let otsu: Awaited<ReturnType<typeof makeEnhancedVariant>> | undefined;
     try {
-      enhanced = await makeContrastVariant(sourceBitmap, false);
-      variants.push(enhanced);
+      enhanced = await makeEnhancedVariant(sourceBitmap);
+      emitProgress(0, `Praproses: luminans ${Math.round(enhanced.averageLuminance)} · ${enhanced.inverted ? 'polaritas dibalik' : 'polaritas normal'} · grayscale, kontras persentil 2–98${enhanced.upscaled ? ' · diperbesar' : ''}.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'praproses tidak tersedia';
       emitProgress(0, `Praproses grayscale/kontras dilewati: ${message}`);
     }
     try {
-      inverted = await makeContrastVariant(sourceBitmap, true);
-      variants.push(inverted);
+      otsu = await makeEnhancedVariant(sourceBitmap, true);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'praproses tidak tersedia';
-      emitProgress(0, `Praproses invert dilewati: ${message}`);
+      const message = error instanceof Error ? error.message : 'binarisasi tidak tersedia';
+      emitProgress(0, `Praproses Otsu dilewati: ${message}`);
     }
 
-    const passes: Array<{ name: string; image: ImageBitmap; psm: PSMType }> = [
-      { name: OCR_PASS_NAMES[0], image: sourceBitmap, psm: PSM.AUTO },
-      ...(enhanced ? [{ name: OCR_PASS_NAMES[1], image: enhanced, psm: PSM.AUTO }] : []),
-      ...(inverted ? [{ name: OCR_PASS_NAMES[2], image: inverted, psm: PSM.SPARSE_TEXT }] : []),
-      ...(!inverted ? [{ name: 'gambar asli · PSM 11', image: sourceBitmap, psm: PSM.SPARSE_TEXT }] : []),
+    const originalCanvas = new OffscreenCanvas(sourceBitmap.width, sourceBitmap.height);
+    const originalContext = originalCanvas.getContext('2d');
+    if (!originalContext) throw new Error('Canvas OCR tidak tersedia untuk gambar asli.');
+    originalContext.drawImage(sourceBitmap, 0, 0);
+    const originalBlob = await originalCanvas.convertToBlob({ type: 'image/png' });
+    const passes: Array<{ name: string; image: Blob; width: number; height: number; psm: PSMType }> = [
+      { name: OCR_PASS_NAMES[0], image: originalBlob, width: sourceBitmap.width, height: sourceBitmap.height, psm: PSM.SINGLE_BLOCK },
+      { name: OCR_PASS_NAMES[1], image: originalBlob, width: sourceBitmap.width, height: sourceBitmap.height, psm: PSM.SPARSE_TEXT },
+      ...(enhanced ? [{ name: OCR_PASS_NAMES[2], image: enhanced.blob, width: enhanced.width, height: enhanced.height, psm: PSM.SINGLE_BLOCK }] : []),
+      ...(enhanced ? [{ name: OCR_PASS_NAMES[3], image: enhanced.blob, width: enhanced.width, height: enhanced.height, psm: PSM.SPARSE_TEXT }] : []),
+      ...(otsu ? [{ name: OCR_PASS_NAMES[4], image: otsu.blob, width: otsu.width, height: otsu.height, psm: PSM.SINGLE_BLOCK }] : []),
+      ...(otsu ? [{ name: OCR_PASS_NAMES[5], image: otsu.blob, width: otsu.width, height: otsu.height, psm: PSM.SPARSE_TEXT }] : []),
     ];
     totalPasses = passes.length;
-    const scaleX = scaledWidth > 0 ? originalWidth / scaledWidth : 1;
-    const scaleY = scaledHeight > 0 ? originalHeight / scaledHeight : 1;
     const wordPasses: OcrWord[][] = [];
     const failures: string[] = [];
+    const deadline = startedAt + 20_000;
 
     for (let index = 0; index < passes.length; index++) {
+      if (Date.now() >= deadline) {
+        emitProgress(Math.round(index / passes.length * 100), 'Batas waktu total OCR tercapai; memakai hasil lintasan yang sudah selesai.');
+        break;
+      }
       const pass = passes[index];
       activePassIndex = index;
       const progressBase = Math.round(index / passes.length * 100);
-      emitProgress(progressBase, `OCR lintasan ${index + 1}/${passes.length}: ${pass.name} (${scaledWidth}×${scaledHeight} px)`);
+      emitProgress(progressBase, `OCR lintasan ${index + 1}/${passes.length}: ${pass.name} (${pass.width}×${pass.height} px)`);
       try {
         await worker.setParameters({ tessedit_pageseg_mode: pass.psm });
-        const result = await worker.recognize(pass.image, {}, { text: true, blocks: true });
+        // Tesseract.js runtime supports Blob here, while its public ImageLike type omits Blob.
+        const result = await worker.recognize(pass.image as unknown as HTMLCanvasElement, {}, { text: true, blocks: true });
+        const scaleX = pass.width > 0 ? originalWidth / pass.width : 1;
+        const scaleY = pass.height > 0 ? originalHeight / pass.height : 1;
         const words = mapTesseractBlocksToWords(result.data.blocks as TesseractBlock[], scaleX, scaleY);
         wordPasses.push(words);
         emitProgress(Math.round((index + 1) / passes.length * 100), `Lintasan ${index + 1}/${passes.length} selesai: ${words.length} kata mentah.`);
+        const uniqueConfident = mergeUniqueOcrWords(wordPasses).filter((word) => word.conf >= 70).length;
+        if (uniqueConfident >= 40) {
+          emitProgress(Math.round((index + 1) / passes.length * 100), `OCR berhenti dini: ${uniqueConfident} kata unik berkeyakinan minimal 70%.`);
+          break;
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'kesalahan tidak diketahui';
         failures.push(`${pass.name}: ${message}`);
@@ -158,6 +183,5 @@ self.onmessage = async (event: MessageEvent<OcrWorkerRequest>) => {
   } finally {
     await worker?.terminate();
     sourceBitmap?.close();
-    variants.forEach((bitmap) => bitmap.close());
   }
 };

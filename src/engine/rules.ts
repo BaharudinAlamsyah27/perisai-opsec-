@@ -44,11 +44,11 @@ function escapeRegExp(text: string): string {
 }
 
 const TECHNICAL_PATTERNS: Record<string, RegExp> = {
-  ipv4: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+  ipv4: /\b(?:[0-9OoIl|]{1,3}\.){3}[0-9OoIl|]{1,3}\b/g,
   email: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
   'internal-host': /\b(?:[A-Z0-9-]+\.(?:local|internal)|intranet|localhost)(?::\d{1,5})?\b|\b(?:localhost|intranet)(?::\d{1,5})?\b|\b[a-z][a-z0-9.-]*:\d{1,5}\b/gi,
-  password: /\b(?:password|passwd|pwd|pass|kata\s+sandi|sandi)\s*[:=]\s*([^\s,;]+)/gi,
-  token: /\b(?:api[_ -]?key|token|secret|bearer)\s*[:=]\s*([A-Z0-9._~+/-]{8,})/gi,
+  password: /(?<![A-Z0-9])(?:password|passwd|pwd|pass|kata[\s_-]*sandi|sandi)\s*(?:-|:|=|–|—)\s*([^\s,;]+)/gi,
+  token: /(?<![A-Z0-9])(?:api[\s_-]*(?:key|token)|token|secret|bearer)\s*(?:-|:|=|–|—)+\s*([A-Z0-9._~+/-]+(?:\s*[- ]\s*[A-Z0-9._~+/-]+){0,4})/gi,
   ssh: /\bssh\s+[a-z0-9._-]+@[a-z0-9.-]+\b/gi,
   'map-link': /\b(?:https?:\/\/)?(?:maps\.app\.goo\.gl|goo\.gl\/maps|google\.com\/maps|maps\.google(?:\.[a-z.]+)?|waze\.com\/ul|openstreetmap\.org|bing\.com\/maps)\S*/gi,
   'decimal-coordinate': /(?<![\d.])(-?\d{1,2}\.\d{4,})\s*[,;/ ]\s*(-?\d{1,3}\.\d{4,})(?![\d.])/g,
@@ -72,6 +72,10 @@ export function redactTechnicalSecrets(text: string): string {
 function validIpv4(value: string): boolean {
   const octets = value.split('.').map(Number);
   return octets.length === 4 && octets.every((octet) => Number.isInteger(octet) && octet >= 0 && octet <= 255);
+}
+
+function normalizeOcrIpv4(value: string): string {
+  return value.replace(/[Oo]/g, '0').replace(/[lI|]/g, '1');
 }
 
 function technicalSeverity(type: string, value: string): Severity | null {
@@ -98,10 +102,10 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
   let findingCounter = 0;
   const nextId = (rule: string) => `${source}-${rule}-${findingCounter++}`;
   const validOcrTokens = source === 'ocr' ? ocrTokens ?? tokenizePlainOcrText(text) : [];
-  const confidenceForRange = (start: number, end: number): number | undefined => {
+  const confidenceForRange = (start: number, end: number, minimumConfidence = MIN_OCR_WORD_CONFIDENCE): number | undefined => {
     if (source !== 'ocr') return undefined;
     const overlapping = validOcrTokens.filter((token) => token.start < end && token.end > start);
-    if (overlapping.length === 0 || overlapping.some((token) => token.confidence < MIN_OCR_WORD_CONFIDENCE)) return Number.NaN;
+    if (overlapping.length === 0 || overlapping.some((token) => token.confidence < minimumConfidence)) return Number.NaN;
     return Math.round(overlapping.reduce((sum, token) => sum + token.confidence, 0) / overlapping.length);
   };
 
@@ -204,7 +208,9 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
     }
   }
 
+  const ceremonialInstitutionalCaption = /\bdirgahayu\b/i.test(text) && /\b(?:tni|tentara\s+nasional\s+indonesia)\b/i.test(text);
   for (const context of kamusKonteksMiliter) {
+    if (ceremonialInstitutionalCaption && context.severity === 'info') continue;
     const normalizedTerm = normalizeText(context.term);
     const termPattern = normalizedTerm.split(' ').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
     const regex = new RegExp(`(?<![\\p{L}\\p{N}])${termPattern}(?![\\p{L}\\p{N}])`, 'giu');
@@ -349,6 +355,8 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
         end = start + capturedValue.length;
         captured = capturedValue;
       }
+      if (rule.type === 'token' && captured.replace(/[^A-Z0-9]/gi, '').length < 8) continue;
+      if (rule.type === 'ipv4') captured = normalizeOcrIpv4(captured);
       if (rule.type === 'ipv4' && !validIpv4(captured)) continue;
       if (rule.type === 'decimal-coordinate') {
         const latitude = Number(match[1]);
@@ -364,8 +372,10 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
           || (latitude === 90 && (minutes[0] !== 0 || seconds[0] !== 0))
           || (longitude === 180 && (minutes[1] !== 0 || seconds[1] !== 0))) continue;
       }
-      const confidence = confidenceForRange(match.index, match.index + match[0].length);
+      const strictTechnical = ['ipv4', 'email', 'internal-host', 'password', 'token'].includes(rule.type);
+      const confidence = confidenceForRange(match.index, match.index + match[0].length, strictTechnical ? 45 : MIN_OCR_WORD_CONFIDENCE);
       if (!shouldAcceptOcrRange(confidence)) continue;
+      const confidenceValue = confidence ?? 100;
       const severity = technicalSeverity(rule.type, captured);
       if (!severity) continue;
       const findingId = nextId(rule.id);
@@ -377,7 +387,9 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
         category: rule.category,
         severity,
         source,
-        evidence: source === 'ocr' ? `${evidenceText} (keyakinan ${confidence}%)` : evidenceText,
+        evidence: source === 'ocr'
+          ? `${evidenceText} (${confidenceValue < MIN_OCR_WORD_CONFIDENCE ? `keyakinan OCR rendah ${confidenceValue}%` : `keyakinan ${confidenceValue}%`})`
+          : evidenceText,
         reason: rule.type === 'location-hint'
           ? 'Petunjuk lokasi atau check-in dapat memperjelas keberadaan pengguna.'
           : rule.type === 'password' || rule.type === 'token'
@@ -398,7 +410,7 @@ export function analyzeText(text: string, source: Source, ocrTokens?: OcrTextTok
     }
   }
 
-  const realtimeMatch = /\b(?:lagi\s+di|sekarang\s+di|live)\b/gi;
+  const realtimeMatch = /\b(?:lagi\s+di|sekarang(?:\s+lagi)?|live)\b/gi;
   let realtime: RegExpExecArray | null;
   while ((realtime = realtimeMatch.exec(text)) !== null) {
     const tail = text.slice(realtime.index + realtime[0].length, realtime.index + realtime[0].length + 100);

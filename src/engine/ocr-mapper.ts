@@ -35,7 +35,7 @@ export function mapOcrWordsToFindings(
 
     const evidenceWords = finding.evidence
       .trim()
-      .replace(/\s+\(keyakinan \d+%\)$/, '')
+      .replace(/\s+\(keyakinan(?: OCR rendah)? \d+%\)$/, '')
       .toLowerCase()
       .split(/\s+/)
       .filter(Boolean);

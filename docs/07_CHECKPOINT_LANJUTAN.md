@@ -105,6 +105,15 @@ T4 TEST:
 - OCR untuk `19_screenshot_teknis.png`: minimal 4 dari 5 jenis (IP, email, sandi, token, URL) terdeteksi.
 - Test abaikan/pulihkan mengubah skor. Dataset 01-18 tidak berubah hasilnya.
 
+### T4-fix — OCR teks terang pada latar gelap
+- Jalankan diagnostik Node lokal lewat `node scripts/ocr-debug.mjs`, dengan langPath/core lokal; keluaran setiap PSM mencatat teks OCR (sandi/token disamarkan), jumlah kata, rata-rata confidence, dan kata yang lolos 70%.
+- Praproses murni atas ImageData: rata-rata luminans, pembalikan polaritas untuk input gelap, grayscale luminans, contrast stretch persentil 2–98, Otsu, dan upscale 1.5–2× sampai sisi panjang maksimum 3200 px.
+- Worker menjalankan PSM 6 dan PSM 11 pada gambar asli, grayscale/kontras, serta Otsu; merge kata unik, early-stop pada 40 kata confidence >=70, timeout keseluruhan tetap 20 detik.
+- Masukan ke `worker.recognize()` harus berupa Blob/File/OffscreenCanvas yang didukung loader Tesseract.js; jangan mengirim `ImageBitmap` langsung. Gambar boleh diterima OCR Worker sebagai data URL lalu didekode untuk praproses.
+- Ambang umum tetap 70. Pola ketat IP/email/host internal/sandi/token menerima OCR >=45 dan bukti di bawah 70 diberi label `keyakinan OCR rendah`; aturan kata kunci biasa tidak dilonggarkan.
+- Normalisasi toleran untuk separator label teknis dan karakter OCR IP O/o, l/I/| hanya di token IP; UI memberi pesan khusus bila seluruh kata OCR berkeyakinan rendah serta tautan ke teks mentah.
+- Test mencakup ImageData gelap sintetis, toleransi pola, teks aman, dataset caption c01–c12, dan screenshot 19 (minimal empat dari lima jenis temuan). Pemeriksaan browser worker visual/offline tetap dilakukan PO.
+
 T5 UI kecil: ganti lencana "FITUR P1" di halaman Pola Hidup menjadi "Fitur lanjutan". Perbarui PRD, README, dan Tentang.
 
 Selesai: test, lint, build lulus; update PROGRESS (Posisi terakhir, Berikutnya); laporkan ringkas dan sebutkan yang belum.

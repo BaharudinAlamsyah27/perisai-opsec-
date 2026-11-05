@@ -1,9 +1,12 @@
 import type { OcrWord } from '../types';
 
 export const OCR_PASS_NAMES = [
-  'gambar asli · PSM otomatis',
-  'grayscale + kontras · PSM otomatis',
-  'gambar terbalik · PSM 11',
+  'gambar asli · PSM 6',
+  'gambar asli · PSM 11',
+  'grayscale + kontras · PSM 6',
+  'grayscale + kontras · PSM 11',
+  'binarisasi Otsu · PSM 6',
+  'binarisasi Otsu · PSM 11',
 ] as const;
 
 export function mergeUniqueOcrWords(passes: OcrWord[][]): OcrWord[] {

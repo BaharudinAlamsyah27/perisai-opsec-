@@ -56,14 +56,7 @@ export async function prepareImageForOcr(file: File, timeoutMs = DEFAULT_OCR_TIM
 
       ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-      resolve({
-        dataUrl,
-        originalWidth,
-        originalHeight,
-        scaledWidth,
-        scaledHeight,
-      });
+      resolve({ dataUrl, originalWidth, originalHeight, scaledWidth, scaledHeight });
     };
 
     img.onerror = () => {

@@ -40,4 +40,13 @@ describe('OCR transparency and coverage messages', () => {
     expect(coverage).toHaveTextContent('Isi visual (wajah, seragam, objek, lokasi) tidak diperiksa');
     expect(screen.queryByText(/foto ini bersih/i)).not.toBeInTheDocument();
   });
+
+  it('shows a low-confidence-specific message and a link to raw OCR when no word meets the threshold', () => {
+    const file = makeFile('recognized');
+    file.ocrWords = [{ text: 'screenshot', conf: 48, bbox: { x0: 0, y0: 0, x1: 50, y1: 12 } }];
+    render(<ResultsPanel file={file} view="findings" />);
+    expect(screen.getByRole('alert')).toHaveTextContent('1 kata terbaca tetapi keyakinan rendah');
+    expect(screen.getAllByRole('link', { name: 'Lihat teks mentah' })[0]).toHaveAttribute('href', '#ocr-raw-transcript');
+    expect(screen.getByLabelText('Teks mentah OCR')).toHaveTextContent('screenshot');
+  });
 });

@@ -1,6 +1,6 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir (5 Nov 2026): Checkpoint T diimplementasikan sebagian-terverifikasi: aturan teknis/lokasi tersirat, penyamaran bukti rahasia, ignore/restore sesi, koreksi OCR tanpa bbox, transparansi Brief/Laporan, serta pembaruan T5 tersedia. `npm test` lulus (37 file/130 tes), lint bersih, build sukses (JS utama 589.01 kB; peringatan chunk >500 kB). Fixture yang dijanjikan PO (`tests/fixtures/dataset-tambahan/19_screenshot_teknis.png` dan `caption-uji.json`) tidak ada di workspace, sehingga OCR screenshot dan seluruh kasus caption PO belum dapat diverifikasi. Perubahan lama S6–S8 dan hasil T berbagi working tree; tidak ada commit terpisah agar tidak mencampur perubahan lama.**
+**Posisi terakhir (5 Nov 2026): T4-fix OCR browser diperbaiki setelah PO mereproduksi error. Akar masalah: lintasan `worker.recognize()` menerima `ImageBitmap`, tetapi Tesseract.js browser loader mengharapkan Blob/OffscreenCanvas/string dan melempar “Error attempting to read image”. Gambar tetap dikirim ke OCR worker sebagai data URL (jalur praproses sudah berfungsi); setiap lintasan kini mengirim Blob PNG hasil canvas ke Tesseract. `npm test` lulus (39 file/147 tes), lint bersih, build sukses (JS 590.20 kB, CSS 60.20 kB; peringatan chunk >500 kB tetap). Uji UI browser lokal belum berhasil dari browser verifikasi karena koneksi ke server dev localhost timeout; PO perlu menguji ulang screenshot 19. Commit belum dibuat karena working tree masih mencampur perubahan S6–S8 dan T; tidak men-staging gabungan yang tidak aman.**
 
 **Terakhir diperbarui:** 5 Nov 2026 oleh Codex · **Fase:** Sprint 2 (P0)
 **Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
@@ -61,7 +61,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 | T-034 | README + ZIP | AG | ⬜ | | |
 | T-035 | Aset submission | PO+PM | ⬜ | | |
 | T-036 | Submit | PO | ⬜ | | |
-| T | Kebocoran teknis, lokasi tersirat, kontrol pengguna | Codex | 🔄 | belum | T1-T3/T5 implementasi; T4 sebagian karena fixture tambahan PO belum tersedia |
+| T | Kebocoran teknis, lokasi tersirat, kontrol pengguna | Codex | ✅ | belum | T1-T5 + T4-fix terverifikasi otomatis; browser worker visual menunggu PO |
 
 **Checkpoint J:** J1 selesai/commit PO dd21e8b. Perubahan J2–J6 terdahulu masih berada di working tree untuk commit manual PO.
 
@@ -75,7 +75,7 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 
 **Checkpoint O:** O1 menyertakan 5 foto demo dan 8 foto pola sintetis (797,177 byte total) dengan label fiktif serta tombol muat contoh. O4 membuat 27 dependency/license records dari `package.json` dan `node_modules`, deklarasi AI, dan keterangan contoh fiktif. O5 README memuat fitur, setup 3 langkah, arsitektur, privasi, batasan, kredit, serta panduan deploy. O6 memeriksa konfigurasi Netlify/Vercel dan menambahkan security headers untuk Vite preview. O2 test otomatis lulus; hasil QA dirangkum di log sesi berikut. O3 source audit tidak menemukan upload foto/caption; uji browser Network/offline dan respons CSP belum dapat diamati.
 
-**Checkpoint T:** T1 aturan teknis (IPv4, email, host internal, sandi/token berlabel, SSH), masking secret, combo infrastruktur dan pemetaan bbox OCR telah dibuat. T2 tautan peta, koordinat desimal/DMS tervalidasi, petunjuk lokasi, serta frasa real-time + lokasi ditangani. T3 tombol Abaikan/Pulihkan menghitung ulang skor dan combo di memori sesi; panel OCR mendukung koreksi yang diberi sumber `Teks koreksi` tanpa bbox; Brief dan Laporan mencantumkan jumlah yang diabaikan. T5 label Pola Hidup, PRD, README, Tentang diperbarui. T4 unit sintetis untuk rules, masking, bbox, Brief/Laporan dan ignore/restore tersedia, tetapi dataset PO di `tests/fixtures/dataset-tambahan/` tidak ditemukan; OCR screenshot 19, skenario `caption-uji.json`, dan regresi dataset 01–18 belum diverifikasi penuh.
+**Checkpoint T:** T1 aturan teknis, masking rahasia, combo infrastruktur dan bbox OCR; T2 tautan/koordinat/petunjuk lokasi; T3 Abaikan/Pulihkan dan koreksi OCR sesi; T5 pembaruan lencana/dokumen selesai. T4-fix menambahkan praproses teks terang/latar gelap, PSM 6/11, Otsu, upscale dan ambang khusus; `caption-uji.json` c01–c12 lulus, screenshot 19 Node OCR mendeteksi >=4/5 jenis, dan dataset sintetis 01–09 lulus tanpa perubahan expected. Browser WebWorker visual/offline masih perlu dicek PO.
 
 ### Audit R0 — 4 Nov 2026
 
@@ -93,10 +93,25 @@ Status: ⬜ belum · 🔄 berjalan · ✅ selesai · ⛔ terblokir · ✂️ dip
 
 Audit gate R0: `git log --oneline -15` menunjukkan Q committed pada `2d35ebc`; `npm test` 32 file/111 tes lulus; `npm run lint` lulus; `npm run build` lulus dengan peringatan chunk utama 572.17 kB (>500 kB). Worktree hanya memiliki `docs/07_CHECKPOINT_LANJUTAN.md` untracked (spesifikasi PO), tidak ada perubahan kode lokal yang tertinggal. Tidak ada upaya push.
 
-**Berikutnya:** PO meninjau S8 pada lebar 360/390/430/768/1024/1366/1920 px memakai daftar cek di bawah. Setelah itu, S7 latar dapat dirancang ulang sesuai arahan PO. O2/O3 QA browser produksi dan checkpoint O tetap belum selesai.
+**Berikutnya:** PO memverifikasi perbaikan T4-fix di browser dengan screenshot sintetis 19: pastikan OCR tidak lagi gagal pada lintasan pertama, temuan IP/email/sandi/token/URL intranet muncul, serta durasi dan kelancaran UI; uji pula offline. Tidak memulai Checkpoint U. Setelah cek T4, PO dapat melanjutkan ke antrean yang disetujui.
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
+### 5 Nov 2026 — Codex — T4-fix OCR teks terang di latar gelap
+- F1 — `node scripts/ocr-debug.mjs` memakai Tesseract lokal `ind+eng` dan langPath/core `public/tessdata`. PSM 6: 35 kata, rata-rata 84.5%, 30 kata >=70%; PSM 11: 42 kata, rata-rata 79.3%, 32 kata >=70%. Diagnostik melaporkan IP, email, sandi, token, dan URL/host intranet. Teks transkrip di output debug menyamarkan nilai akses.
+- F2 — `ocrPreprocess.ts` menyediakan fungsi murni luminans/grayscale, polaritas otomatis untuk gambar gelap, stretch persentil 2–98, Otsu, upscale 1.5–2x dengan sisi panjang maksimal 3200px. Worker berjalan berurutan PSM 6/11 untuk asli, enhanced, Otsu; merge kata unik, early stop 40 kata yakin, batas 20 detik, log per lintasan.
+- F3/F4 — Ambang umum 70 dipertahankan; IPv4/email/host/sandi/token OCR menerima >=45 dan mencantumkan "keyakinan OCR rendah" di bawah 70. Label toleran spasi/underscore/hyphen; karakter OCR IP O/o dan l/I/| dinormalisasi hanya di kandidat IP, lalu oktet divalidasi.
+- F5 — Jika semua kata di bawah 70, coverage dan panel OCR menampilkan jumlah kata berkeyakinan rendah dan tautan "Lihat teks mentah".
+- F6 — Test ImageData sintetis, caption c01–c12, teks aman, variasi IP/token/password, ambang OCR, serta screenshot 19 (>=4 jenis). `npm test`: 39 file/147 tes lulus; lint bersih; build sukses JS 590.20 kB/CSS 60.20 kB; warning Vite chunk >500 kB. Dataset kasus 01–09 tetap lulus. UI browser/offline belum diuji manual.
+- Commit T4-fix belum dicoba: perubahan S6–S8 dan T masih berbagi working tree; file staging penuh akan mencampur pekerjaan sebelumnya. PO dapat commit setelah meninjau diff.
+
+### 5 Nov 2026 — Codex — Perbaikan lanjutan T4-fix: input lintasan Tesseract
+- Reproduksi PO di browser mengonfirmasi error teknis berulang pada lintasan pertama. Praproses Worker berhasil; error “Error attempting to read image” terjadi ketika objek `ImageBitmap` diteruskan ke Tesseract.
+- Pemeriksaan loader Tesseract.js lokal menunjukkan `recognize()` membaca Blob/File/OffscreenCanvas, bukan `ImageBitmap`. Worker tetap menerima data URL (jalur decode/praprosesnya telah bekerja), kemudian mengirim Blob PNG untuk gambar asli dan varian grayscale/Otsu pada PSM 6/11.
+- Verifikasi akhir: `npm test` 39 file/147 tes lulus, lint lulus, build lulus (worker OCR 22.91 kB, JS 590.20 kB, CSS 60.20 kB; peringatan Vite chunk >500 kB). `git diff --check` bersih.
+- Percobaan membuka dev server dari browser verifikasi lokal gagal dengan `ERR_CONNECTION_TIMED_OUT`; perilaku WebWorker browser/produksi masih perlu konfirmasi. PO perlu mengunggah ulang screenshot 19 dan memastikan lintasan serta temuan tampil.
+- Tidak memulai Checkpoint U. Commit tidak dibuat karena worktree berisi perubahan S6–S8/T yang tercampur.
+
 ### 5 Nov 2026 — Codex — Checkpoint T
 - T1 — Menambahkan `aturan-teknis.json` dan aturan deterministik OCR/caption: validasi IP/rentang privat, email instansi, host internal, secret berlabel, SSH; secret ditampilkan sebagai 2 karakter awal + empat bullet. `combo-groups.json` dan `combos.ts` menghasilkan temuan kritis “Gambaran Infrastruktur Terbaca” dari dua jenis kebocoran. Bbox rahasia OCR dipetakan berdasarkan range agar tetap dapat disensor Versi Aman.
 - T2 — Menambahkan deteksi link peta, koordinat desimal dengan batas lat/lon, koordinat DMS dengan batas derajat/menit/detik, petunjuk check-in/lokasi, dan frasa real-time yang berdekatan dengan lokasi tetap.
@@ -477,7 +492,7 @@ Format:
 - —
 
 ## 7. Blocker Aktif
-- 5 Nov 2026 — Fixture Checkpoint T yang dijanjikan PO belum tersedia di `tests/fixtures/dataset-tambahan/`; OCR screenshot teknis dan test berbasis `caption-uji.json` belum bisa dijalankan. Tidak ada fixture foto pihak lain yang ditambahkan.
+- 5 Nov 2026 — Browser worker visual/offline belum dapat diverifikasi di sesi ini; PO diminta menguji alur pada preview browser. Fixture screenshot 19 dan caption kini tersedia dan test otomatis lulus.
 - 5 Nov 2026 — Commit T belum dicoba karena working tree masih mencampur perubahan S6–S8 lama dengan file integrasi yang kini disentuh T; staging per-file berisiko memasukkan perubahan lama ke commit checkpoint. PO dapat meninjau dan commit perubahan manual setelah fixture masuk.
 - 4 Nov 2026 — Commit J2, T-023, T-024, dan T-027 gagal karena izin sistem menolak akses `.git/index.lock`. O2/O3 manual browser QA juga belum lengkap: Computer Use berhenti setelah Escape fisik pengguna, dan localhost ditolak sandbox shell. Perubahan J–O tetap di working tree; tidak dilakukan bypass. Push dilakukan PO.
 - 4 Nov 2026 — Percobaan commit O1 gagal karena izin sistem menolak pembuatan `.git/index.lock` (`Permission denied`). O1–O6 menunggu commit manual PO; tidak dilakukan bypass.

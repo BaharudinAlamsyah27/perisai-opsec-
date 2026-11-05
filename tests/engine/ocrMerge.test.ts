@@ -5,7 +5,7 @@ const box = (x0: number, y0 = 10) => ({ x0, y0, x1: x0 + 45, y1: y0 + 20 });
 
 describe('multi-pass OCR word merge', () => {
   it('plans contrast/invert passes with PSM 11 and keeps unique words at the best confidence', () => {
-    expect(OCR_PASS_NAMES).toHaveLength(3);
+    expect(OCR_PASS_NAMES).toHaveLength(6);
     expect(OCR_PASS_NAMES.some((name) => name.includes('PSM 11'))).toBe(true);
     const merged = mergeUniqueOcrWords([
       [
