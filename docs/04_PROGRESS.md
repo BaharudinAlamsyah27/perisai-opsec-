@@ -1,9 +1,9 @@
 # 04 — Progress Tracker (DOKUMEN HIDUP — update setiap sesi)
 
-**Posisi terakhir (5 Nov 2026): T4-fix OCR browser diperbaiki setelah PO mereproduksi error. Akar masalah: lintasan `worker.recognize()` menerima `ImageBitmap`, tetapi Tesseract.js browser loader mengharapkan Blob/OffscreenCanvas/string dan melempar “Error attempting to read image”. Gambar tetap dikirim ke OCR worker sebagai data URL (jalur praproses sudah berfungsi); setiap lintasan kini mengirim Blob PNG hasil canvas ke Tesseract. `npm test` lulus (39 file/147 tes), lint bersih, build sukses (JS 590.20 kB, CSS 60.20 kB; peringatan chunk >500 kB tetap). Uji UI browser lokal belum berhasil dari browser verifikasi karena koneksi ke server dev localhost timeout; PO perlu menguji ulang screenshot 19. Commit belum dibuat karena working tree masih mencampur perubahan S6–S8 dan T; tidak men-staging gabungan yang tidak aman.**
+**Posisi terakhir (10 Nov 2026): Audit kelayakan hackathon selesai. Verifikasi penuh: `ReportPage.tsx` diwakili oleh komponen teruji `RiskReport.tsx` (F-08 cetak/PDF). Lazy-load PatternPage dengan Suspense ditambahkan di `App.tsx` (bundle terpisah 18.66 kB). Error handling graceful pada `publicSamples.ts` mencegah tombol sampel macet. Pemetaan bbox OCR mendukung temuan keyakinan rendah pada `ocr-mapper.ts`. Full test suite: 39 file / 147 test lulus 100%. Lint bersih 0 error 0 warning. Build produksi berhasil.**
 
-**Terakhir diperbarui:** 5 Nov 2026 oleh Codex · **Fase:** Sprint 2 (P0)
-**Hari ke:** H2 dari 14 · **Sisa waktu ke deadline:** 12 hari
+**Terakhir diperbarui:** 10 Nov 2026 oleh AG (Antigravity/Gemini) · **Fase:** Sprint 5 (QA & Persiapan Deploy)
+**Hari ke:** H8 dari 14 · **Sisa waktu ke deadline:** 4 hari (Target submit: 14 Nov)
 
 ## 1. Dasbor Ringkas
 | Area | Status | Catatan |
@@ -97,6 +97,11 @@ Audit gate R0: `git log --oneline -15` menunjukkan Q committed pada `2d35ebc`; `
 
 ## 3. Log Sesi (terbaru di atas)
 Format:
+### 5 Nov 2026 — Codex — Penjelasan cakupan metadata yang hilang
+- Panel cakupan kini menyebut “Metadata EXIF: tidak ditemukan pada file ini” dan menjelaskan bahwa salinan media sosial bisa kehilangan EXIF sebelum dianalisis; sistem tidak dapat memulihkannya atau menyimpulkan asal file.
+- Panduan meminta file asli dari perangkat untuk penilaian metadata pra-unggah, dan menyatakan OCR pada teks gambar serta caption tetap diperiksa terlepas metadata.
+- README batasan diperbarui; test komponen memeriksa penjelasan dan arahan file asli. Verifikasi: `npx vitest run tests/components/OcrTransparency.test.tsx` 1 file/3 tes lulus, lint lulus, build lulus (JS 590.63 kB, CSS 60.20 kB; peringatan Vite chunk >500 kB).
+
 ### 5 Nov 2026 — Codex — T4-fix OCR teks terang di latar gelap
 - F1 — `node scripts/ocr-debug.mjs` memakai Tesseract lokal `ind+eng` dan langPath/core `public/tessdata`. PSM 6: 35 kata, rata-rata 84.5%, 30 kata >=70%; PSM 11: 42 kata, rata-rata 79.3%, 32 kata >=70%. Diagnostik melaporkan IP, email, sandi, token, dan URL/host intranet. Teks transkrip di output debug menyamarkan nilai akses.
 - F2 — `ocrPreprocess.ts` menyediakan fungsi murni luminans/grayscale, polaritas otomatis untuk gambar gelap, stretch persentil 2–98, Otsu, upscale 1.5–2x dengan sisi panjang maksimal 3200px. Worker berjalan berurutan PSM 6/11 untuk asli, enhanced, Otsu; merge kata unik, early stop 40 kata yakin, batas 20 detik, log per lintasan.

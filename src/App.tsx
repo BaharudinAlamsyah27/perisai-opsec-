@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Header, ActiveTab } from './components/Header';
 import { PrivacyBanner } from './components/PrivacyBanner';
-import { PatternPage } from './pages/PatternPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { AboutPage } from './pages/AboutPage';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { DikPage } from './pages/DikPage';
+
+const PatternPage = React.lazy(() =>
+  import('./pages/PatternPage').then((m) => ({ default: m.PatternPage }))
+);
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('analisis');
@@ -16,7 +19,11 @@ export const App: React.FC = () => {
 
       <main className="min-w-0 w-full max-w-7xl mx-auto flex-1 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
         {activeTab === 'analisis' && <AnalysisPage onOpenTab={setActiveTab} />}
-        {activeTab === 'pola-hidup' && <PatternPage />}
+        {activeTab === 'pola-hidup' && (
+          <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-cyan-300">Memuat modul Rekonstruksi Pola Hidup...</div>}>
+            <PatternPage />
+          </Suspense>
+        )}
         {activeTab === 'dik' && <DikPage />}
         {activeTab === 'privasi' && <PrivacyPage />}
         {activeTab === 'tentang' && <AboutPage />}

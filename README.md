@@ -36,6 +36,7 @@ Aplikasi adalah SPA React + TypeScript yang dibangun Vite. Zustand menyimpan ses
 ## Batasan
 
 - OCR tidak sempurna; tulisan kecil, buram, miring, tertutup, atau bahasa yang tidak didukung dapat terlewat atau salah dibaca. Periksa hasil sebelum mengambil keputusan.
+- EXIF yang tidak ditemukan hanya menjelaskan file yang dipilih. Salinan dari media sosial mungkin sudah kehilangan metadata, dan aplikasi tidak dapat memulihkan metadata yang sudah dihapus. Untuk memeriksa risiko metadata sebelum unggah, analisis file asli dari perangkat; teks gambar dan caption tetap diperiksa pada file yang dipilih.
 - HEIC/HEIF belum didukung; konversikan salinan ke JPG atau PNG terlebih dahulu.
 - Temuan berbasis kamus bergantung pada istilah yang dikonfigurasi dan bukan pengganti pemeriksaan manusia.
 - Versi aman hanya menyensor area teks yang berhasil dideteksi; periksa pratinjau dan hasil unduhan.

@@ -34,7 +34,9 @@ describe('OCR transparency and coverage messages', () => {
     render(<ResultsPanel file={file} view="findings" />);
     expect(screen.getByRole('alert')).toHaveTextContent('Teks pada gambar tidak terbaca, hasil mungkin tidak lengkap');
     const coverage = screen.getByRole('region', { name: 'Cakupan pemeriksaan' });
-    expect(coverage).toHaveTextContent('Metadata: tidak ada');
+    expect(coverage).toHaveTextContent('Metadata EXIF: tidak ditemukan pada file ini');
+    expect(coverage).toHaveTextContent('Metadata yang tidak ditemukan tidak membuktikan file aman');
+    expect(coverage).toHaveTextContent('pilih file asli dari perangkat');
     expect(coverage).toHaveTextContent('OCR: tidak ada teks');
     expect(coverage).toHaveTextContent('Aturan: 0 kecocokan');
     expect(coverage).toHaveTextContent('Isi visual (wajah, seragam, objek, lokasi) tidak diperiksa');

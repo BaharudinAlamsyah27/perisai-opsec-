@@ -18,6 +18,9 @@ export function mapOcrWordsToFindings(
     // If finding already has a bounding box, keep it
     if (finding.bbox) return finding;
 
+    const isLowConf = finding.evidence.includes('keyakinan OCR rendah');
+    const minConf = isLowConf ? 45 : MIN_OCR_WORD_CONFIDENCE;
+
     if (finding.range) {
       let cursor = 0;
       const matched: BoundingBox[] = [];
@@ -25,7 +28,7 @@ export function mapOcrWordsToFindings(
         const start = cursor;
         const end = start + word.text.length;
         cursor = end + 1;
-        if (word.conf >= MIN_OCR_WORD_CONFIDENCE && start < finding.range.end && end > finding.range.start) matched.push(word.bbox);
+        if (word.conf >= minConf && start < finding.range.end && end > finding.range.start) matched.push(word.bbox);
       }
       if (matched.length > 0) return { ...finding, bbox: {
         x0: Math.min(...matched.map((box) => box.x0)), y0: Math.min(...matched.map((box) => box.y0)),
@@ -42,7 +45,7 @@ export function mapOcrWordsToFindings(
 
     if (evidenceWords.length === 0) return finding;
 
-    const confidentWords = words.filter((word) => word.conf >= MIN_OCR_WORD_CONFIDENCE);
+    const confidentWords = words.filter((word) => word.conf >= minConf);
 
     // Search for sequence of matching words in OCR words
     let matchedBboxes: BoundingBox[] = [];

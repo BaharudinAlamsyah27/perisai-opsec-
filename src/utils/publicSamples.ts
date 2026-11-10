@@ -14,15 +14,34 @@ export const PATTERN_SAMPLE_NAMES = [
 ] as const;
 
 export async function fetchPublicSamples(names: readonly string[]): Promise<File[]> {
-  const responses = await Promise.all(names.map(async (name) => {
-    const response = await fetch(`${import.meta.env.BASE_URL}samples/${name}`);
-    if (!response.ok) throw new Error(`File contoh ${name} tidak dapat dimuat.`);
-    return { name, blob: await response.blob() };
-  }));
-  return responses.map(({ name, blob }) => new File([blob], name, { type: 'image/jpeg' }));
+  try {
+    const files: File[] = [];
+    for (const name of names) {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}samples/${name}`);
+        if (response.ok) {
+          const blob = await response.blob();
+          files.push(new File([blob], name, { type: 'image/jpeg' }));
+        } else {
+          console.warn(`File contoh ${name} tidak dapat dimuat: HTTP ${response.status}`);
+        }
+      } catch (err) {
+        console.warn(`Gagal memuat file contoh ${name}:`, err);
+      }
+    }
+    return files;
+  } catch (err) {
+    console.warn('Gagal memuat sampel foto:', err);
+    return [];
+  }
 }
 
 export async function fetchMissingPatternSamples(existingNames: readonly string[]): Promise<File[]> {
-  const missingNames = PATTERN_SAMPLE_NAMES.filter((name) => !existingNames.includes(name));
-  return missingNames.length > 0 ? fetchPublicSamples(missingNames) : [];
+  try {
+    const missingNames = PATTERN_SAMPLE_NAMES.filter((name) => !existingNames.includes(name));
+    return missingNames.length > 0 ? await fetchPublicSamples(missingNames) : [];
+  } catch (err) {
+    console.warn('Gagal memuat sampel pola:', err);
+    return [];
+  }
 }
