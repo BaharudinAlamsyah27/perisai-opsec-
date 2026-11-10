@@ -1,5 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Activity, Clock3, MapPin, Radar, ShieldAlert, Timer, Waypoints } from 'lucide-react';
+import {
+  Activity,
+  Clock3,
+  MapPin,
+  Radar,
+  ShieldAlert,
+  Timer,
+  Waypoints,
+  ArrowRight,
+  Route,
+  AlertOctagon,
+} from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { analyzePatterns, formatPatternTime, renderPatternInsight, type PatternAnalysisResult } from '../engine/pattern';
 import { LeafletMap } from '../components/LeafletMap';
@@ -8,7 +19,7 @@ import { fetchMissingPatternSamples } from '../utils/publicSamples';
 const CLUSTER_COLORS = ['#34d399', '#22d3ee', '#fbbf24', '#fb7185', '#a78bfa', '#60a5fa', '#f472b6'];
 const WEEKDAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const READABILITY_STYLE = {
-  Tinggi: 'border-emerald-600/60 bg-emerald-950/60 text-emerald-200',
+  Tinggi: 'border-rose-600/70 bg-rose-950/40 text-rose-200',
   Sedang: 'border-amber-600/60 bg-amber-950/60 text-amber-200',
   Rendah: 'border-slate-700 bg-slate-900 text-slate-300',
 } as const;
@@ -40,15 +51,52 @@ const RelativeClusterMap: React.FC<{ result: PatternAnalysisResult; labels: Reco
     <title>Sebaran relatif lokasi</title>
     <desc>Tiap lingkaran mewakili satu klaster GPS. Posisi relatif, bukan peta jalan.</desc>
     <path d={`M${padding} ${height - padding}H${width - padding}M${padding} ${padding}V${height - padding}`} stroke="#334155" strokeDasharray="4 6" />
+
+    {/* Transition route lines between clusters */}
+    {result.transitions.map((transition, idx) => {
+      const fromPt = points.find((p) => p.cluster.id === transition.fromClusterId);
+      const toPt = points.find((p) => p.cluster.id === transition.toClusterId);
+      if (!fromPt || !toPt) return null;
+      const x1 = pointX(fromPt.xValue);
+      const y1 = pointY(fromPt.yValue);
+      const x2 = pointX(toPt.xValue);
+      const y2 = pointY(toPt.yValue);
+      return (
+        <g key={`trans-${idx}`}>
+          <line
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="#22d3ee"
+            strokeWidth="2.5"
+            strokeDasharray="6 4"
+            opacity="0.8"
+          />
+          <circle cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} r="3" fill="#22d3ee" />
+          <text
+            x={(x1 + x2) / 2}
+            y={(y1 + y2) / 2 - 8}
+            fill="#67e8f9"
+            fontSize="9"
+            fontFamily="monospace"
+            textAnchor="middle"
+          >
+            Rute Terbaca ({transition.count}x)
+          </text>
+        </g>
+      );
+    })}
+
     {points.map(({ cluster, xValue, yValue }, index) => {
       const x = pointX(xValue);
       const y = pointY(yValue);
       const color = colorForCluster(index);
       return <g key={cluster.id}>
         <title>{labels[cluster.id] ?? cluster.label}: {cluster.photoCount} foto</title>
-        <circle cx={x} cy={y} r={Math.min(24, 10 + cluster.photoCount * 2)} fill={`${color}33`} stroke={color} strokeWidth="2" />
-        <circle cx={x} cy={y} r="4" fill={color} />
-        <text x={Math.min(width - 90, x + 13)} y={y - 8} fill={color} fontSize="12" fontFamily="monospace">{labels[cluster.id] ?? cluster.label}</text>
+        <circle cx={x} cy={y} r={Math.min(26, 12 + cluster.photoCount * 2)} fill={`${color}33`} stroke={color} strokeWidth="2" />
+        <circle cx={x} cy={y} r="5" fill={color} />
+        <text x={Math.min(width - 90, x + 14)} y={y - 8} fill={color} fontSize="12" fontFamily="monospace" fontWeight="bold">{labels[cluster.id] ?? cluster.label}</text>
       </g>;
     })}
     <text x={padding} y={height - 10} fill="#94a3b8" fontSize="10" fontFamily="monospace">BARAT</text>
@@ -234,6 +282,50 @@ export const PatternPage: React.FC = () => {
           <p className="mt-1 text-xs text-slate-400">Jendela waktu rutinitas ±{result.routineWindowMinutes} menit.</p>
         </div>
       </section>
+
+      {/* Rekonstruksi Alur Pergerakan Taktis */}
+      {result.transitions.length > 0 && (
+        <section className="rounded-2xl border border-rose-500/50 bg-gradient-to-r from-rose-950/60 via-slate-950 to-slate-950 p-5 shadow-2xl relative overflow-hidden" aria-label="Rekonstruksi rute taktis">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertOctagon className="h-5 w-5 text-rose-400 animate-pulse shrink-0" />
+            <h2 className="font-mono text-sm font-bold tracking-wide text-rose-200">
+              REKONSTRUKSI RUTE TAKTIS &amp; PREDIKSI JADWAL LAWAN
+            </h2>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed mb-4 max-w-3xl">
+            Pihak luar dapat menyimpulkan adanya koridor pergerakan rutin berulang dari kumpulan foto. Ini membuka risiko pengintaian dan pencegatan pada jam-jam berikut:
+          </p>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {result.transitions.map((transition, idx) => {
+              const fromLabel = labels[transition.fromClusterId] ?? result.clusters.find((c) => c.id === transition.fromClusterId)?.label;
+              const toLabel = labels[transition.toClusterId] ?? result.clusters.find((c) => c.id === transition.toClusterId)?.label;
+              const fromCluster = result.clusters.find((c) => c.id === transition.fromClusterId);
+              const toCluster = result.clusters.find((c) => c.id === transition.toClusterId);
+              return (
+                <div key={idx} className="rounded-xl border border-rose-900/60 bg-slate-950/90 p-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono text-rose-300">
+                    <span className="flex items-center gap-1 font-bold">
+                      <Route className="w-3.5 h-3.5" />
+                      RUTE RUTIN TERDETEKSI
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-rose-900/80 text-[10px] font-bold text-rose-200">
+                      {transition.count}x Terulang
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-bold text-white font-mono">
+                    <span className="text-emerald-400">{fromLabel}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span className="text-cyan-400">{toLabel}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-normal">
+                    Berangkat sekitar pukul <strong className="text-emerald-300 font-mono">{fromCluster ? formatPatternTime(fromCluster.medianMinuteOfDay) : '--'} WIB</strong> menuju <strong className="text-cyan-300 font-mono">{toLabel}</strong> (tiba ~{toCluster ? formatPatternTime(toCluster.medianMinuteOfDay) : '--'} WIB).
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="grid gap-4 xl:grid-cols-2">
         <article className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
