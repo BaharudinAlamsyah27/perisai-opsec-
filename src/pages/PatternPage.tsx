@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Route,
   AlertOctagon,
+  Upload,
 } from 'lucide-react';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { analyzePatterns, formatPatternTime, renderPatternInsight, type PatternAnalysisResult } from '../engine/pattern';
@@ -221,6 +222,15 @@ export const PatternPage: React.FC = () => {
     }
   };
 
+  const handleUserUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = Array.from(event.target.files ?? []);
+    if (uploadedFiles.length === 0) return;
+    addFiles(uploadedFiles, { metadataOnly: true });
+    setResult(null);
+    setStatusMessage(`${uploadedFiles.length} foto Anda ditambahkan ke sesi. Metadata sedang dibaca; setelah itu klik 'Analisis pola dari sesi ini'.`);
+    event.target.value = '';
+  };
+
   useEffect(() => {
     if (!waitingForSession || hasPendingFileAnalysis) return;
     const patternResult = analyzePatterns(currentFiles);
@@ -250,12 +260,56 @@ export const PatternPage: React.FC = () => {
           {!fastMode && hasPendingFileAnalysis && <p className="mt-2 text-xs text-amber-200" role="status">Mode lengkap menunggu pemrosesan foto sesi saat ini selesai, lalu memakai GPS dan waktu EXIF.</p>}
           {statusMessage && <p className="mt-2 text-xs text-cyan-200" role="status">{statusMessage}</p>}
         </div>
+        <label className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/70 bg-emerald-700/80 hover:bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-950/50 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 transition-all">
+          <Upload className="h-4 w-4" />
+          <span>Unggah foto sendiri</span>
+          <input
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleUserUpload}
+            className="hidden"
+          />
+        </label>
         <button type="button" onClick={runPatternAnalysis} disabled={waitingForSession} className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/70 bg-cyan-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-950/60 hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:cursor-wait disabled:opacity-60">
           {waitingForSession ? <Timer className="h-4 w-4 animate-pulse" /> : <Radar className="h-4 w-4" />}
           {waitingForSession ? 'Menunggu foto…' : 'Analisis pola dari sesi ini'}
         </button>
         <button type="button" onClick={() => void loadPatternSamples()} disabled={loadingPatternSamples} className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-700/60 bg-amber-950/40 px-4 py-3 text-sm font-semibold text-amber-100 hover:bg-amber-900/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60">{loadingPatternSamples ? 'Memuat contoh…' : 'Muat contoh pola hidup'}</button>
       </div>
+
+      {files.length > 0 && (
+        <div className="mt-4 border-t border-slate-800 pt-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="font-mono text-xs font-bold text-slate-300">
+              FOTO DALAM SESI AKTIF ({files.length} BERKAS)
+            </span>
+            <span className="text-[11px] text-slate-400">
+              {files.filter((f) => f.exif?.latitude !== undefined && f.exif?.longitude !== undefined).length} foto memiliki koordinat GPS
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto pr-1">
+            {files.map((file) => {
+              const hasGPS = file.exif?.latitude !== undefined && file.exif?.longitude !== undefined;
+              return (
+                <div
+                  key={file.id}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono ${
+                    hasGPS
+                      ? 'border-emerald-500/40 bg-emerald-950/40 text-emerald-200'
+                      : 'border-slate-800 bg-slate-900/60 text-slate-400'
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${hasGPS ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                  <span className="max-w-[150px] truncate">{file.name}</span>
+                  <span className="text-[10px] opacity-75">{hasGPS ? '✓ Ada GPS' : '✗ Tanpa GPS'}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <p className="mt-3 text-[11px] text-slate-500">Foto tanpa koordinat GPS atau waktu pengambilan yang valid tidak dipetakan. Sebaran di bawah bersifat relatif dan tidak memuat peta jalan.</p>
       <p className="mt-2 text-[10px] font-mono font-bold tracking-wide text-emerald-300">DATA CONTOH FIKTIF · tersedia untuk demonstrasi</p>
     </header>
