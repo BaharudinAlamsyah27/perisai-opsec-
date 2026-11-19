@@ -1,75 +1,112 @@
 # PERISAI OPSEC
 
-**Periksa sebelum unggah.** PERISAI OPSEC adalah aplikasi web statis untuk membantu memeriksa potensi kebocoran informasi operasional dari foto dan caption sebelum dibagikan. Proyek ini dibuat untuk Kartika Cyber Hackathon 2026, kategori Penangkalan.
+> **Periksa sebelum unggah.** Aplikasi web pemeriksa kebocoran informasi operasional (OPSEC) foto, metadata EXIF/GPS, teks citra (OCR), dan rekonstruksi pola hidup — berjalan **100% di browser tanpa mengirim data ke server**.
 
-## Fitur
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-perisai--opsec.vercel.app-06b6d4?style=for-the-badge&logo=vercel)](https://perisai-opsec.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](./LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-147%20Passed-22c55e?style=for-the-badge&logo=vitest)](./docs/05_QA_TEST_PLAN.md)
+[![Tech](https://img.shields.io/badge/React%2018%20%7C%20TypeScript%20%7C%20WASM-3b82f6?style=for-the-badge&logo=react)](./package.json)
 
-- Baca metadata foto: GPS, waktu menurut perangkat, perangkat, dan metadata lain yang tersedia.
-- OCR bahasa Indonesia dan Inggris untuk mendeteksi teks di dalam gambar, termasuk kotak bukti (bbox).
-- Analisis caption, kamus aturan OPSEC, Daftar Informasi Kritis (DIK) satuan, dan temuan kombinasi pola.
-- Skor risiko transparan, profil penilaian, brief intelijen otomatis, laporan cetak, dan versi foto aman.
-- Rekonstruksi pola hidup dari GPS dan waktu beberapa foto.
-- Deteksi kebocoran teknis (alamat IP, kontak, host, nilai akses) dan petunjuk lokasi tertulis; nilai sandi/token disamarkan pada bukti.
-- Abaikan/pulihkan temuan untuk menilai ulang skor dalam sesi, serta koreksi teks hasil OCR tanpa bbox.
-- Foto contoh fiktif untuk demonstrasi tanpa perlu menyiapkan dataset sendiri.
+![PERISAI OPSEC Banner](./public/og-image.png)
 
-## Menjalankan secara lokal (3 langkah)
+Proyek ini dibuat untuk **Kartika Cyber Hackathon 2026** (Kategori: **Penangkalan**) oleh **Tim Raphael Protocol**.
 
-1. Pasang Node.js LTS, lalu jalankan `npm install` dari root proyek.
-2. Jalankan `npm run dev`.
+---
+
+## 🌐 Live Demo & Cara Mencoba
+
+- **URL Publik (Tanpa Login):** [https://perisai-opsec.vercel.app](https://perisai-opsec.vercel.app)
+- **Mode Demo Instan (Data Fiktif):**
+  1. Buka halaman **Analisis**, lalu klik **"Coba foto contoh"** untuk memuat 5 skenario sintetis (foto bersih, GPS saja, papan satuan/NRP fiktif, dokumen `RAHASIA` fiktif, plat dinas contoh).
+  2. Buka halaman **Pola Hidup**, lalu klik **"Muat contoh pola hidup"** (atau **"Unggah foto sendiri"**) untuk melihat rekonstruksi rute & jadwal rutin dari 8 foto GPS sintetis.
+  3. Klik **"Buat versi aman"** untuk mengunduh salinan foto yang sudah bersih dari metadata EXIF dan tersensor otomatis.
+
+---
+
+## ✨ Fitur Utama
+
+- **Ekstraksi Metadata EXIF & GPS:** Membaca koordinat lokasi, waktu pengambilan, dan tipe perangkat secara lokal tanpa mengunggah file.
+- **OCR Luring (WebAssembly):** Mengenali teks bahasa Indonesia dan Inggris di dalam foto menggunakan Tesseract.js lokal lengkap dengan *bounding box* bukti.
+- **Kamus & Mesin Aturan OPSEC:** Mendeteksi nama satuan, NRP, kode rahasia, kebocoran teknis (IP, password, token, host), petunjuk lokasi tertulis, Daftar Informasi Kritis (DIK) satuan, serta kombinasi risiko (*combo findings*).
+- **Skor Risiko Transparan (Noisy-OR):** Menghitung indeks risiko terstruktur pada 4 sumbu (*Lokasi, Identitas, Waktu, Teknis*) disertai brief intelijen dan laporan cetak/PDF.
+- **Sanitasi & Sensor Otomatis 1-Klik:** Meng-encode ulang gambar melalui Canvas untuk melucuti seluruh metadata EXIF dan memburamkan area teks sensitif.
+- **Rekonstruksi Pola Hidup:** Mengelompokkan koordinat dan timestamp beberapa foto menjadi kluster lokasi, koridor perpindahan, dan peringatan prediksi jadwal rutin oleh pihak luar.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React 18, TypeScript, Tailwind CSS v3, Lucide React
+- **State Management:** Zustand (in-memory session)
+- **Mesin Analisis Luring:** `exifr` (metadata), `tesseract.js` v7 + `tessdata_fast` lokal (OCR WASM), `cobe` (3D WebGL Globe), `leaflet` (peta opt-in)
+- **Build & QA:** Vite 6, Vitest (147 test cases), Testing Library, ESLint (`--max-warnings 0`), Prettier
+
+---
+
+## 📁 Struktur Folder
+
+```text
+perisai-opsec/
+├── public/
+│   ├── samples/          # 13 foto contoh sintetis/fiktif (aman untuk demo)
+│   ├── tessdata/         # Model WASM & traineddata Tesseract lokal (offline-ready)
+│   └── og-image.png      # Thumbnail & preview Open Graph (1200x630)
+├── src/
+│   ├── components/       # Komponen UI (GlobeHero, ScanOverlay, SanitizerPreview, dll.)
+│   ├── engine/           # Mesin deterministik murni (EXIF, OCR, rules, scoring, pattern)
+│   ├── pages/            # Halaman (AnalysisPage, PatternPage, DikPage, PrivacyPage, AboutPage)
+│   └── store/            # State sesi Zustand
+├── tests/                # 39 file pengujian unit, komponen, dan dataset sintetis
+├── docs/                 # PRD, Arsitektur, Rencana Kerja, QA Plan, & Galeri Screenshot
+├── vercel.json           # Konfigurasi SPA & header keamanan (CSP, X-Frame-Options)
+└── netlify.toml          # Konfigurasi alternatif deploy Netlify
+```
+
+---
+
+## 💻 Menjalankan Secara Lokal (3 Langkah)
+
+Aplikasi ini **tidak memerlukan backend, database, maupun API key** (lihat `.env.example`).
+
+1. Pasang Node.js LTS, lalu jalankan dari root proyek:
+   ```bash
+   npm install
+   ```
+2. Jalankan server pengembangan:
+   ```bash
+   npm run dev
+   ```
 3. Buka URL lokal yang ditampilkan Vite (biasanya `http://localhost:5173`).
 
-Periksa sebelum rilis dengan `npm test`, `npm run lint`, dan `npm run build`. Untuk memeriksa hasil produksi secara lokal, jalankan `npm run preview` setelah build.
+Verifikasi kualitas sebelum rilis:
+```bash
+npm test
+npm run lint
+npm run build
+```
 
-## Arsitektur singkat
+---
 
-Aplikasi adalah SPA React + TypeScript yang dibangun Vite. Zustand menyimpan sesi di memori browser. Fungsi murni di `src/engine/` membaca EXIF, menjalankan OCR berbasis Tesseract.js Web Worker dan WASM, mencocokkan kamus, memberi skor deterministik, dan menyusun pola. Canvas membuat versi foto aman dan menghapus metadata saat encode ulang. Tidak ada backend aplikasi.
+## 🔒 Privasi & Keamanan
 
-## Privasi
+- **Zero-Upload Guarantee:** Foto, caption, OCR, DIK, dan analisis berjalan sepenuhnya di browser pengguna. Tidak ada pengiriman data ke server aplikasi.
+- **Peta Opt-In:** Tile OpenStreetMap hanya diminta setelah pengguna menekan kontrol persetujuan eksplisit (permintaan tile dapat mengungkap area peta yang dilihat).
+- **Penyimpanan Lokal Opsional:** DIK default disimpan di memori sesi; penyimpanan perangkat (`localStorage`) bersifat opt-in.
+- **Data Sintetis:** Seluruh foto contoh di `public/samples/` dibuat secara sintetis (fiktif) dan tidak memuat data personel nyata.
 
-- Foto, caption, OCR, DIK, dan analisis berjalan di browser. Data pengguna tidak dikirim ke server aplikasi.
-- Aset aplikasi, worker, WASM, traineddata OCR, dan foto contoh disajikan sebagai file statis lokal.
-- Peta OpenStreetMap opsional; tile hanya diminta setelah pengguna menekan kontrol persetujuan. Permintaan tile dapat mengungkap area peta yang dilihat.
-- DIK default hanya disimpan di memori sesi. Opsi penyimpanan perangkat menggunakan localStorage dan harus diaktifkan secara eksplisit.
-- Semua foto contoh di `public/samples/` dibuat sintetis. Nama, kode, tulisan, GPS, dan waktu di dalamnya fiktif.
+---
 
-## Batasan
+## ⚠️ Batasan
 
-- OCR tidak sempurna; tulisan kecil, buram, miring, tertutup, atau bahasa yang tidak didukung dapat terlewat atau salah dibaca. Periksa hasil sebelum mengambil keputusan.
-- EXIF yang tidak ditemukan hanya menjelaskan file yang dipilih. Salinan dari media sosial mungkin sudah kehilangan metadata, dan aplikasi tidak dapat memulihkan metadata yang sudah dihapus. Untuk memeriksa risiko metadata sebelum unggah, analisis file asli dari perangkat; teks gambar dan caption tetap diperiksa pada file yang dipilih.
-- HEIC/HEIF belum didukung; konversikan salinan ke JPG atau PNG terlebih dahulu.
-- Temuan berbasis kamus bergantung pada istilah yang dikonfigurasi dan bukan pengganti pemeriksaan manusia.
-- Versi aman hanya menyensor area teks yang berhasil dideteksi; periksa pratinjau dan hasil unduhan.
-- Tile OSM memerlukan internet dan persetujuan. Analisis metadata dan OCR tidak memerlukan layanan peta.
+- OCR tidak sempurna; tulisan kecil, buram, miring, atau tertutup dapat terlewat—periksa hasil dan gunakan fitur koreksi teks bila perlu.
+- Salinan foto yang diunduh dari media sosial (WhatsApp/Instagram) umumnya sudah kehilangan EXIF oleh platform tersebut; aplikasi tidak dapat memulihkan metadata yang sudah terhapus.
+- Format HEIC/HEIF belum didukung secara langsung; konversikan ke JPG atau PNG terlebih dahulu.
+- Versi aman hanya menyensor area teks yang terdeteksi memiliki *bounding box*; selalu periksa pratinjau sebelum mengunduh.
 
-## Foto contoh
+---
 
-Pada halaman Analisis, pilih **Coba foto contoh** untuk memuat lima gambar sintetis: foto bersih, GPS saja, papan satuan/NRP fiktif, dokumen bertanda RAHASIA fiktif, dan plat contoh yang sah. Pada halaman Pola Hidup, pilih **Muat contoh pola hidup** untuk memuat delapan foto metadata sintetis. Keseluruhan 13 JPG berukuran kurang dari 2 MB.
+## 📜 Kredit & Lisensi
 
-## Kredit dan lisensi
+Dirilis di bawah lisensi [MIT](./LICENSE). Daftar lengkap dependency dan lisensi tersedia di halaman **Tentang** aplikasi (dihasilkan melalui `npm run licenses`). Aset traineddata Tesseract (bahasa Indonesia & Inggris) berlisensi Apache-2.0.
 
-Daftar dependency dan lisensinya dibuat dari `package.json` dan `node_modules` dengan `npm run licenses`, lalu ditampilkan pada halaman Tentang. Aset traineddata Tesseract menyertakan bahasa Indonesia dan Inggris dan dilisensikan Apache-2.0. Peta menggunakan OpenStreetMap (ODbL) hanya saat opt-in.
-
-Proyek dikembangkan dengan bantuan AI coding assistant (Antigravity dan Codex); kode dan aturan keamanan diverifikasi serta diuji.
-
-## Deploy statis
-
-Konfigurasi header keamanan dan fallback SPA tersedia pada `netlify.toml` dan `vercel.json`.
-
-### Netlify
-
-1. Hubungkan repository Git ke Netlify dan pilih build command `npm run build`.
-2. Isi publish directory `dist`.
-3. Deploy; pastikan header `Content-Security-Policy` muncul pada dokumen utama dan file aset dapat diakses di `/samples/` serta `/tessdata/`.
-
-### Vercel
-
-1. Impor repository ke Vercel dan pilih framework Vite (build command `npm run build`, output `dist`).
-2. Deploy dengan `vercel.json` di root repository.
-3. Verifikasi header CSP dan fallback URL SPA pada hasil deploy.
-
-Sebelum publikasi, jalankan `npm test`, `npm run lint`, `npm run build`, dan periksa aplikasi pada URL preview produksi. Jangan mengaktifkan peta saat demonstrasi privasi penuh.
-
-## Dokumentasi
-
-Lihat `docs/01_PRD.md`, `docs/02_ARSITEKTUR.md`, `docs/03_RENCANA_KERJA.md`, `docs/04_PROGRESS.md`, `docs/05_QA_TEST_PLAN.md`, dan `docs/06_DEMO_SUBMISSION.md`.
+Proyek dikembangkan dengan bantuan AI coding assistant; seluruh logika keamanan dan mesin aturan deterministik telah diuji dan diverifikasi secara otomatis.
